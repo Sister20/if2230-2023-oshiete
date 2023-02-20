@@ -12,30 +12,36 @@ void framebuffer_set_cursor(uint8_t r, uint8_t c)
     // TODO : Implement
     uint16_t pos = r * VGA_WIDTH + c;
 
-    out(CURSOR_PORT_CMD, 14);                 
+    out(CURSOR_PORT_CMD, 14);
     out(CURSOR_PORT_DATA, pos >> 8);
-    out(CURSOR_PORT_CMD, 15);              
+    out(CURSOR_PORT_CMD, 15);
     out(CURSOR_PORT_DATA, pos & 0xff);
 }
 
 void framebuffer_write(uint8_t row, uint8_t col, char c, uint8_t fg, uint8_t bg)
 {
     // TODO : Implement
-    uint16_t* location = framebuffer + (row * VGA_WIDTH + col);
-    uint16_t entry = (uint16_t) c | framebuffer_set_color(fg,bg) << 8;
+    uint16_t *location = framebuffer + (row * VGA_WIDTH + col);
+    uint16_t entry = framebuffer_set_entry(c, fg, bg);
     *location = entry;
-    memset(location + 1, entry, 1);
+    // memset(location, framebuffer_set_entry(c, fg, bg), 2);
 }
 
 void framebuffer_clear(void)
 {
-    // TODO : Implement
-    uint16_t data = (uint16_t) ' ' << 8 | framebuffer_set_color(0,0); 
-    size_t size = VGA_HEIGHT * VGA_WIDTH; 
-    memset(framebuffer, data, size*2); 
+
+    // size_t size = VGA_HEIGHT * VGA_WIDTH;
+    for (size_t row = 0; row < VGA_HEIGHT; row++)
+    {
+        for (size_t col = 0; col < VGA_WIDTH; col++)
+        {
+            const size_t index = row * VGA_WIDTH + col;
+            framebuffer[index] = framebuffer_set_entry(' ', VGA_COLOR_BLACK, VGA_COLOR_BLACK);
+        }
+    }
 }
 
-uint8_t framebuffer_set_color(enum vga_color fg, enum vga_color bg)
+uint16_t framebuffer_set_entry(char c, enum vga_color fg, enum vga_color bg)
 {
-    return fg | bg << 4;
+    return (uint16_t)c | (uint16_t)(fg | bg << 4) << 8;
 };
