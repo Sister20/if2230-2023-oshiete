@@ -21,9 +21,13 @@ static uint16_t *framebuffer = (uint16_t *)MEMORY_FRAMEBUFFER; // type cast to u
 //     // TODO : Implement
 // }
 
-
 void framebuffer_clear(void)
 {
     // TODO : Implement
-    memset(framebuffer, framebuffer_set_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK), VGA_WIDTH * VGA_HEIGHT * sizeof(char));
+    memset(framebuffer, framebuffer_set_color(VGA_COLOR_WHITE, VGA_COLOR_DARK_GREY), VGA_WIDTH * VGA_HEIGHT * sizeof(char));
 }
+
+uint8_t framebuffer_set_color(enum vga_color fg, enum vga_color bg)
+{
+    return fg | bg << 4;
+};

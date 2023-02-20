@@ -62,9 +62,6 @@ enum vga_color
     VGA_COLOR_WHITE = 15,
 };
 
-uint8_t framebuffer_set_color(enum vga_color fg, enum vga_color bg)
-{
-    return fg | bg << 4;
-};
+uint8_t framebuffer_set_color(enum vga_color fg, enum vga_color bg);
 
 #endif
