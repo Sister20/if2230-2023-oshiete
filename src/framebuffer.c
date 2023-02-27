@@ -24,13 +24,10 @@ void framebuffer_write(uint8_t row, uint8_t col, char c, uint8_t fg, uint8_t bg)
     uint16_t *location = framebuffer + (row * VGA_WIDTH + col);
     uint16_t entry = framebuffer_set_entry(c, fg, bg);
     *location = entry;
-    // memset(location, framebuffer_set_entry(c, fg, bg), 2);
 }
 
 void framebuffer_clear(void)
 {
-
-    // size_t size = VGA_HEIGHT * VGA_WIDTH;
     for (size_t row = 0; row < VGA_HEIGHT; row++)
     {
         for (size_t col = 0; col < VGA_WIDTH; col++)
