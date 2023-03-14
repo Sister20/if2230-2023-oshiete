@@ -33,7 +33,7 @@ void framebuffer_clear(void)
         for (size_t col = 0; col < VGA_WIDTH; col++)
         {
             const size_t index = row * VGA_WIDTH + col;
-            framebuffer[index] = framebuffer_set_entry(' ', VGA_COLOR_BLACK, VGA_COLOR_BLACK);
+            framebuffer[index] = framebuffer_set_entry(' ', VGA_COLOR_WHITE, VGA_COLOR_BLACK);
         }
     }
 }
