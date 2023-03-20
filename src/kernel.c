@@ -7,18 +7,15 @@
 #include "lib-header/splash.h"
 #include "lib-header/idt.h"
 #include "lib-header/interrupt.h"
+#include "lib-header/keyboard.h"
 
 void kernel_setup(void) {
     enter_protected_mode(&_gdt_gdtr);
     pic_remap();
     initialize_idt();
     framebuffer_clear();
-
-    /* SPLASH SCREEN */
-    splash();
-
     framebuffer_set_cursor(0, 0);
-    
-    __asm__("int $0x4");
-    while (TRUE);
+    activate_keyboard_interrupt();
+    while (TRUE)
+      keyboard_state_activate();
 }

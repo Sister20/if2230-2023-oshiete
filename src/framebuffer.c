@@ -7,6 +7,16 @@ static const size_t VGA_WIDTH = 80;                            // width
 static const size_t VGA_HEIGHT = 25;                           // height
 static uint16_t *framebuffer = (uint16_t *)MEMORY_FRAMEBUFFER; // type cast to uint16
 
+uint16_t framebuffer_get_cursor() {
+    uint16_t currentPos;
+    out(CURSOR_PORT_CMD, 14);
+    currentPos = in(CURSOR_PORT_DATA) << 8;
+    out(CURSOR_PORT_CMD, 15);
+    currentPos |= in(CURSOR_PORT_DATA);
+
+    return currentPos;
+}
+
 void framebuffer_set_cursor(uint8_t r, uint8_t c)
 {
     // TODO : Implement
