@@ -3,6 +3,8 @@
 #include "lib-header/framebuffer.h"
 #include "lib-header/stdmem.h"
 
+static uint16_t *framebuffer = (uint16_t*) MEMORY_FRAMEBUFFER; // type cast to uint16
+
 static struct KeyboardDriverState keyboard_state = {
     FALSE, // read_extended_mode
     TRUE,  // keyboard_input_on
@@ -55,14 +57,27 @@ void keyboard_isr(void) {
 
         // Get Cursor Position
         uint16_t currentPos = framebuffer_get_cursor();
-        uint8_t row = currentPos / 80, col = currentPos % 80;
+        uint8_t row = currentPos / VGA_WIDTH, col = currentPos % VGA_WIDTH;
 
         // Action
         if (mapped_char == '\0') {
 
         } else if (mapped_char == '\b') {
-            framebuffer_write(row, col, ' ', DEFAULT_FG, DEFAULT_BG);
-            framebuffer_set_cursor(row, col - 1);
+            uint8_t newRow, newCol;
+            if (col == 0) {
+                if (row == 0) {
+                    newRow = 0, newCol = 0;
+                } else {
+                    newRow = row - 1, newCol = VGA_WIDTH - 1;
+                    while ((char) (framebuffer[newRow * VGA_WIDTH + newCol - 1] & 0xff) == ' ') {
+                        newCol--;
+                    }
+                }
+            } else {
+                newRow = row, newCol = col - 1;
+            }
+            framebuffer_set_cursor(newRow, newCol);
+            framebuffer_write(newRow, newCol, ' ', DEFAULT_FG, DEFAULT_BG);
         } else if (mapped_char == '\n') {
             framebuffer_set_cursor(row + 1, 0);
         } else {
