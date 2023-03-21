@@ -10,6 +10,10 @@
 #define DEFAULT_FG VGA_COLOR_WHITE
 #define DEFAULT_BG VGA_COLOR_BLACK
 
+static const size_t VGA_WIDTH = 80;                            // width
+static const size_t VGA_HEIGHT = 25;                           // height
+
+
 /**
  * Terminal framebuffer
  * Resolution: 80x25
