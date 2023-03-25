@@ -20,6 +20,8 @@ void kernel_setup(void)
     framebuffer_write(3, 10, 'i', 0, 0xF);
     framebuffer_write(3, 11, '!', 0, 0xF);
     framebuffer_set_cursor(3, 10);
+
+    // write_blocks(fs_signature, 0, 1);
     initialize_filesystem_fat32();
 
     while (TRUE)

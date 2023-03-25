@@ -114,7 +114,7 @@ struct FAT32DriverState
     struct ClusterBuffer cluster_buf;
 } __attribute__((packed));
 
-extern struct FAT32DriverState driver_state;
+static volatile struct FAT32DriverState driver_state;
 /**
  * FAT32DriverRequest - Request for Driver CRUD operation
  *

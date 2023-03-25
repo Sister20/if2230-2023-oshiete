@@ -21,7 +21,7 @@ const uint8_t fs_signature[BLOCK_SIZE] = {
  */
 uint32_t cluster_to_lba(uint32_t cluster)
 {
-    return cluster * 4 + 1;
+    return cluster * CLUSTER_BLOCK_COUNT + 1;
 }
 
 /**
@@ -45,11 +45,13 @@ bool is_empty_storage(void)
  */
 void init_directory_table(struct FAT32DirectoryTable *dir_table, char *name, uint32_t parent_dir_cluster)
 {
-    strncpy(dir_table->table[0].name, name, 8);
-    dir_table->table[0].cluster_low = (uint16_t)(parent_dir_cluster & 0xFFFF);
-    dir_table->table[0].cluster_high = (uint16_t)(parent_dir_cluster >> 16);
-    dir_table->table[0].attribute = ATTR_SUBDIRECTORY;
-    dir_table->table[0].filesize = 0;
+    struct FAT32DirectoryEntry *entry = &(dir_table->table[0]);
+    memcpy(entry->name, name, 8);
+    memcpy(entry->ext, "   ", 3);
+    entry->cluster_low = (uint16_t)(parent_dir_cluster & 0xFFFF);
+    entry->cluster_high = (uint16_t)(parent_dir_cluster >> 16);
+    entry->attribute = ATTR_SUBDIRECTORY;
+    entry->filesize = 0;
 };
 
 /**
@@ -63,21 +65,24 @@ void create_fat32(void)
 
     struct FAT32FileAllocationTable fat;
 
-    struct FAT32DirectoryTable dir_table;
-    init_directory_table(&dir_table, "root", ROOT_CLUSTER_NUMBER);
+    struct FAT32DirectoryTable root_dir_table;
+    init_directory_table(&root_dir_table, "root\0\0\0\0", ROOT_CLUSTER_NUMBER);
 
-    fat.cluster_map[0] = CLUSTER_0_VALUE;
-    fat.cluster_map[1] = CLUSTER_1_VALUE;
-    fat.cluster_map[2] = FAT32_FAT_EMPTY_ENTRY;
+    fat.cluster_map[0] = (uint32_t)CLUSTER_0_VALUE;
+    fat.cluster_map[1] = (uint32_t)CLUSTER_1_VALUE;
+    fat.cluster_map[2] = (uint32_t)FAT32_FAT_END_OF_FILE;
 
     write_blocks(&fat, cluster_to_lba(1), CLUSTER_BLOCK_COUNT);
+    write_blocks(&root_dir_table, cluster_to_lba(2), CLUSTER_BLOCK_COUNT);
 }
 /**
  * Initialize file system driver state, if is_empty_storage() then create_fat32()
  * Else, read and cache entire FileAllocationTable (located at cluster number 1) into driver state
  */
-void initialize_filesystem_fat32(void){
-    if(is_empty_storage()){
+void initialize_filesystem_fat32(void)
+{
+    if (is_empty_storage())
+    {
         create_fat32();
     }
     struct FAT32FileAllocationTable fat;
