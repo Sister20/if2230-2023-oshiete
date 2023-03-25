@@ -5,6 +5,7 @@
 #include "lib-header/framebuffer.h"
 #include "lib-header/kernel_loader.h"
 #include "lib-header/splash.h"
+#include "lib-header/fat32.h"
 
 void kernel_setup(void)
 {
@@ -19,6 +20,8 @@ void kernel_setup(void)
     framebuffer_write(3, 10, 'i', 0, 0xF);
     framebuffer_write(3, 11, '!', 0, 0xF);
     framebuffer_set_cursor(3, 10);
+    initialize_filesystem_fat32();
 
-    while (TRUE);
+    while (TRUE)
+        ;
 }
