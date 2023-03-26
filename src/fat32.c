@@ -11,24 +11,11 @@ const uint8_t fs_signature[BLOCK_SIZE] = {
     // [BLOCK_SIZE-1] = 'k',
 };
 
-/* -- Driver Interfaces -- */
-
-/**
- * Convert cluster number to logical block address
- *
- * @param cluster Cluster number to convert
- * @return uint32_t Logical Block Address
- */
 uint32_t cluster_to_lba(uint32_t cluster)
 {
     return cluster * CLUSTER_BLOCK_COUNT + 1;
 }
 
-/**
- * Checking whether filesystem signature is missing or not in boot sector
- *
- * @return True if memcmp(boot_sector, fs_signature) returning inequality
- */
 bool is_empty_storage(void)
 {
     uint8_t boot_sector[BLOCK_SIZE];
@@ -36,35 +23,24 @@ bool is_empty_storage(void)
     return memcmp(boot_sector, fs_signature, sizeof(fs_signature));
 };
 
-/**
- * Initialize DirectoryTable value with parent DirectoryEntry and directory name
- *
- * @param dir_table          Pointer to directory table
- * @param name               8-byte char for directory name
- * @param parent_dir_cluster Parent directory cluster number
- */
 void init_directory_table(struct FAT32DirectoryTable *dir_table, char *name, uint32_t parent_dir_cluster)
 {
-    struct FAT32DirectoryEntry *entry = &(dir_table->table[0]);
+    struct FAT32DirectoryEntry *entry = &(dir_table->table[0]); // updates index 0
     memcpy(entry->name, name, 8);
     memcpy(entry->ext, "   ", 3);
-    entry->cluster_low = (uint16_t)(parent_dir_cluster & 0xFFFF);
+    entry->cluster_low = (uint16_t)(parent_dir_cluster & 0xFFFF); // points to parent dir
     entry->cluster_high = (uint16_t)(parent_dir_cluster >> 16);
     entry->attribute = ATTR_SUBDIRECTORY;
     entry->filesize = 0;
 };
 
-/**
- * Create new FAT32 file system. Will write fs_signature into boot sector and
- * proper FileAllocationTable (contain CLUSTER_0_VALUE, CLUSTER_1_VALUE,
- * and initialized root directory) into cluster number 1
- */
 void create_fat32(void)
 {
     write_blocks(fs_signature, BOOT_SECTOR, 1); // write fs_signature into boot sector
 
     struct FAT32FileAllocationTable fat;
 
+    // initialize root
     struct FAT32DirectoryTable root_dir_table;
     init_directory_table(&root_dir_table, "root\0\0\0\0", ROOT_CLUSTER_NUMBER);
 
@@ -72,20 +48,74 @@ void create_fat32(void)
     fat.cluster_map[1] = (uint32_t)CLUSTER_1_VALUE;
     fat.cluster_map[2] = (uint32_t)FAT32_FAT_END_OF_FILE;
 
-    write_blocks(&fat, cluster_to_lba(1), CLUSTER_BLOCK_COUNT);
-    write_blocks(&root_dir_table, cluster_to_lba(2), CLUSTER_BLOCK_COUNT);
+    // write fat and root dir table to disk
+    write_blocks(&fat, cluster_to_lba(FAT_CLUSTER_NUMBER), CLUSTER_BLOCK_COUNT);
+    write_blocks(&root_dir_table, cluster_to_lba(ROOT_CLUSTER_NUMBER), CLUSTER_BLOCK_COUNT);
 }
-/**
- * Initialize file system driver state, if is_empty_storage() then create_fat32()
- * Else, read and cache entire FileAllocationTable (located at cluster number 1) into driver state
- */
+
 void initialize_filesystem_fat32(void)
 {
     if (is_empty_storage())
     {
         create_fat32();
     }
+
+    // load fat to driver state
     struct FAT32FileAllocationTable fat;
-    read_blocks(&fat, cluster_to_lba(1), CLUSTER_BLOCK_COUNT);
+    read_clusters(&fat, FAT_CLUSTER_NUMBER, 1);
     driver_state.fat_table = fat;
+
+    // load root directory table to driver state
+    struct FAT32DirectoryTable root_dir_table;
+    read_clusters(&root_dir_table, ROOT_CLUSTER_NUMBER, 1);
+    driver_state.dir_table_buf = root_dir_table;
+}
+
+void write_clusters(const void *ptr, uint32_t cluster_number, uint8_t cluster_count)
+{
+    write_blocks(ptr, cluster_to_lba(cluster_number), cluster_count * CLUSTER_BLOCK_COUNT);
+};
+
+void read_clusters(void *ptr, uint32_t cluster_number, uint8_t cluster_count)
+{
+    read_blocks(ptr, cluster_to_lba(cluster_number), cluster_count * CLUSTER_BLOCK_COUNT);
+};
+
+int8_t read_directory(struct FAT32DriverRequest request)
+{
+    // struct ClusterBuffer cluster_data;
+    // buffer size should be equal to size of FAT32DirectoryTable
+    if (request.buffer_size != sizeof(struct FAT32DirectoryTable) || request.parent_cluster_number < ROOT_CLUSTER_NUMBER)
+    {
+        return -1;
+    }
+
+    // cast void pointer to FAT32DirectoryTable pointer
+    struct FAT32DirectoryTable parent_dir_table;
+
+    // read parent cluster
+    read_clusters(&parent_dir_table, request.parent_cluster_number, 1);
+
+    int8_t ret = 2;
+    // traverse the parent directory
+    for (int i = 0; i < (int)(CLUSTER_SIZE / sizeof(struct FAT32DirectoryEntry)); i++)
+    {
+        // current dir entry has the same name as req
+        if (memcmp(&parent_dir_table.table[i].name, request.name, 8) == 0)
+        {
+            ret = 1;
+            //  current dir entry is a subdir
+            if (parent_dir_table.table[i].attribute == ATTR_SUBDIRECTORY)
+            {
+                // copies the dir table to buf
+                struct FAT32DirectoryTable *dir_table = (struct FAT32DirectoryTable *)request.buf;
+                uint32_t dir_cluster_number = (parent_dir_table.table[i].cluster_high << 16) | parent_dir_table.table[i].cluster_low;
+                read_clusters(dir_table, dir_cluster_number, 1);
+                ret = 0;
+                break;
+            }
+        }
+    }
+
+    return ret;
 }

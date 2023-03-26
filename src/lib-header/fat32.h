@@ -126,6 +126,7 @@ static volatile struct FAT32DriverState driver_state;
  */
 struct FAT32DriverRequest
 {
+    
     void *buf;
     char name[8];
     char ext[3];
