@@ -24,6 +24,16 @@ void kernel_setup(void)
     // write_blocks(fs_signature, 0, 1);
     initialize_filesystem_fat32();
 
+    uint8_t cbuf[sizeof(struct FAT32DirectoryTable)];
+
+    struct FAT32DriverRequest request = {
+        .buf = cbuf,
+        .name = "ikanaide",
+        .ext = "uwu",
+        .parent_cluster_number = ROOT_CLUSTER_NUMBER,
+        .buffer_size = sizeof(struct FAT32DirectoryTable),
+    };
+
     while (TRUE)
         ;
 }
