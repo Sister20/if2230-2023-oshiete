@@ -89,3 +89,72 @@ void initialize_filesystem_fat32(void)
     read_blocks(&fat, cluster_to_lba(1), CLUSTER_BLOCK_COUNT);
     driver_state.fat_table = fat;
 }
+
+/**
+ * FAT32 write, write a file or folder to file system.
+ *
+ * @param request All attribute will be used for write, buffer_size == 0 then create a folder / directory
+ * @return Error code: 0 success - 1 file/folder already exist - 2 invalid parent cluster - -1 unknown
+ */
+int8_t write(struct FAT32DriverRequest request)
+{
+    // GET FAT TABLE
+    struct FAT32FileAllocationTable fat = driver_state.fat_table;
+
+    // CHECK IF PARENT_CLUSTER_NUMBER IS VALID
+    bool parentClusterValid = fat.cluster_map[request.parent_cluster_number] != 0;
+
+    if (parentClusterValid){
+        // CHECK IF FILE OR FOLDER ALREADY EXIST
+        bool hasExisted = 0;
+
+        // OPEN FOLDER
+        //struct FAT32DirectoryTable dir_table = driver_state.dir_table_buf;
+
+        if (!hasExisted){
+            // LOOP THROUGH CLUSTER MAP, FIND CLUSTER TO FILL FILE/TABLE
+            int i = 3;
+            while (fat.cluster_map[i] != 0){
+                i++;
+            }
+
+            // check whether request is file or folder
+            if (request.buffer_size == 0){
+                // create sub directory from parent
+                struct FAT32DirectoryTable new_table;
+
+                struct FAT32DirectoryEntry *new_entry = &(new_table.table[0]);
+                memcpy(new_entry->name, request.name, 8);
+                memcpy(new_entry->ext, "   ", 3);
+                new_entry->cluster_low = (uint16_t)(request.parent_cluster_number & 0xFFFF);
+                new_entry->cluster_high = (uint16_t)(request.parent_cluster_number >> 16);
+                new_entry->attribute = ATTR_SUBDIRECTORY;
+                new_entry->filesize = 0;
+
+                // update parent directory attribute
+
+                // write new table
+                write_blocks(&new_table, cluster_to_lba(i), CLUSTER_BLOCK_COUNT);
+
+            } else {
+                // add file to cluster
+
+            }
+
+            driver_state.fat_table = fat;
+
+            return 0;
+        } 
+        else 
+        {
+            return 1;
+        }
+
+    } 
+    else 
+    {
+        return 2;
+    }
+
+    return -1;
+}
