@@ -41,12 +41,28 @@ void framebuffer_clear(void)
         for (size_t col = 0; col < VGA_WIDTH; col++)
         {
             const size_t index = row * VGA_WIDTH + col;
-            framebuffer[index] = framebuffer_set_entry(' ', VGA_COLOR_WHITE, VGA_COLOR_BLACK);
+            framebuffer[index] = framebuffer_set_entry('\0', DEFAULT_FG, DEFAULT_BG);
         }
     }
 }
 
 uint16_t framebuffer_set_entry(char c, enum vga_color fg, enum vga_color bg)
 {
-    return (uint16_t)c | (uint16_t)(fg | bg << 4) << 8;
+    return (uint16_t) c | (uint16_t) (fg | bg << 4) << 8;
 };
+
+char framebuffer_getchar(uint8_t row, uint8_t col) {
+    return framebuffer[row * VGA_WIDTH + col] & 0xff;
+}
+
+void framebuffer_scroll_down() {
+    for (size_t i = 0; i < VGA_HEIGHT; i++) {
+        for (size_t j = 0; j < VGA_WIDTH; j++) {
+            if (i == VGA_HEIGHT - 1) {
+                framebuffer_write(i, j, '\0', DEFAULT_FG, DEFAULT_BG);
+            } else {
+                framebuffer_write(i, j, framebuffer_getchar(i + 1, j), DEFAULT_FG, DEFAULT_BG);
+            }
+        }
+    }
+}

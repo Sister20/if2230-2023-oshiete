@@ -13,7 +13,6 @@
 static const size_t VGA_WIDTH = 80;                            // width
 static const size_t VGA_HEIGHT = 25;                           // height
 
-
 /**
  * Terminal framebuffer
  * Resolution: 80x25
@@ -72,5 +71,9 @@ enum vga_color
 };
 
 uint16_t framebuffer_set_entry(char c, enum vga_color fg, enum vga_color bg);
+
+char framebuffer_getchar(uint8_t row, uint8_t col);
+
+void framebuffer_scroll_down();
 
 #endif
