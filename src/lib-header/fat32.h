@@ -126,7 +126,7 @@ static volatile struct FAT32DriverState driver_state;
  */
 struct FAT32DriverRequest
 {
-    
+
     void *buf;
     char name[8];
     char ext[3];
@@ -230,5 +230,7 @@ int8_t write(struct FAT32DriverRequest request);
  * @return Error code: 0 success - 1 not found - 2 folder is not empty - -1 unknown
  */
 int8_t delete(struct FAT32DriverRequest request);
+
+uint32_t findEmptyCluster();
 
 #endif

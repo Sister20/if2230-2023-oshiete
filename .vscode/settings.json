@@ -1,6 +1,7 @@
 {
     "debug.onTaskErrors": "debugAnyway",
     "files.associations": {
-        "portio.h": "c"
+        "portio.h": "c",
+        "kernel_loader.h": "c"
     },
 }
