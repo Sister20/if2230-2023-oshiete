@@ -24,13 +24,13 @@ void kernel_setup(void)
     // write_blocks(fs_signature, 0, 1);
     initialize_filesystem_fat32();
 
-    // uint8_t cbuf[sizeof(struct FAT32DirectoryTable)];
+    uint8_t cbuf[sizeof(struct FAT32DirectoryTable)];
 
 
-    struct ClusterBuffer cbuf[5];
-    for (uint32_t i = 0; i < 5; i++)
-        for (uint32_t j = 0; j < CLUSTER_SIZE; j++)
-            cbuf[i].buf[j] = i;
+    // struct ClusterBuffer cbuf[5];
+    // for (uint32_t i = 0; i < 5; i++)
+    //     for (uint32_t j = 0; j < CLUSTER_SIZE; j++)
+    //         cbuf[i].buf[j] = i;
 
     // struct FAT32DriverRequest request = {
     //     .buf = cbuf,
@@ -40,11 +40,11 @@ void kernel_setup(void)
     //     .buffer_size = 128,
     // };
     struct FAT32DriverRequest request = {
-        .buf                   = (void*)cbuf,
-        .name                  = "ikanaide",
+        .buf                   = cbuf,
+        .name                  = "ikaaide",
         .ext                   = "uwu",
         .parent_cluster_number = ROOT_CLUSTER_NUMBER,
-        .buffer_size           = 0,
+        .buffer_size           = 100,
     } ;
 
     // write(request);
