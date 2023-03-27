@@ -2,6 +2,7 @@
 #include "lib-header/fat32.h"
 #include "lib-header/disk.h"
 #include "lib-header/stdmem.h"
+#include "lib-header/cmos.h"
 
 // FAT32 - IF2230 edition"
 const uint8_t fs_signature[BLOCK_SIZE] = {
@@ -19,14 +20,18 @@ uint32_t cluster_to_lba(uint32_t cluster)
 bool is_empty_storage(void)
 {
     uint8_t boot_sector[BLOCK_SIZE];
-    read_blocks(boot_sector, 0, 1);
+    read_blocks(boot_sector, BOOT_SECTOR, 1);
     return memcmp(boot_sector, fs_signature, sizeof(fs_signature));
 };
 
 void init_directory_table(struct FAT32DirectoryTable *dir_table, char *name, uint32_t parent_dir_cluster)
 {
     struct FAT32DirectoryEntry *entry = &(dir_table->table[0]); // updates index 0
+    struct time t;
+    get_cmos_time(&t);
     memcpy(entry->name, name, 8);
+    entry->create_time = t.hour << 11 | t.minute << 5 | t.second / 2;
+    entry->create_date = (t.year - 1980) << 9 | t.month << 5 | t.day;
     entry->cluster_low = (uint16_t)(parent_dir_cluster & 0xFFFF); // points to parent dir
     entry->cluster_high = (uint16_t)(parent_dir_cluster >> 16);
     entry->attribute = ATTR_SUBDIRECTORY;
@@ -160,21 +165,26 @@ int8_t write(struct FAT32DriverRequest request)
     // check if parent valid
     bool parent_valid = driver_state.dir_table_buf.table[0].attribute == ATTR_SUBDIRECTORY;
 
-    if (parent_valid){
+    if (parent_valid)
+    {
         // LOOP THROUGH CLUSTER MAP, FIND CLUSTER TO FILL FILE/TABLE
         uint32_t i = 3;
-        while (driver_state.fat_table.cluster_map[i] != 0 && i < CLUSTER_MAP_SIZE){
+        while (driver_state.fat_table.cluster_map[i] != 0 && i < CLUSTER_MAP_SIZE)
+        {
             i++;
         }
 
         uint32_t entry = 0;
-        while (entry == 0){
+        while (entry == 0)
+        {
             // FIND WHICH ENTRY TO INSERT
-            while (driver_state.dir_table_buf.table[entry].name[0] != '\0' && entry < (CLUSTER_SIZE / sizeof(struct FAT32DirectoryEntry))){
-                if (isFolder && (memcmp((void *)driver_state.dir_table_buf.table[entry].name,request.name, 8) == 0) && (driver_state.dir_table_buf.table[entry].attribute == ATTR_SUBDIRECTORY)){
+            while (driver_state.dir_table_buf.table[entry].name[0] != '\0' && entry < (CLUSTER_SIZE / sizeof(struct FAT32DirectoryEntry)))
+            {
+                if (isFolder && (memcmp((void *)driver_state.dir_table_buf.table[entry].name, request.name, 8) == 0) && (driver_state.dir_table_buf.table[entry].attribute == ATTR_SUBDIRECTORY))
+                {
                     return 1;
                 }
-                if (!isFolder && memcmp((void *)driver_state.dir_table_buf.table[entry].name,request.name, 8) == 0 &&  memcmp((void *)driver_state.dir_table_buf.table[entry].ext,request.ext, 3) == 0)
+                if (!isFolder && memcmp((void *)driver_state.dir_table_buf.table[entry].name, request.name, 8) == 0 && memcmp((void *)driver_state.dir_table_buf.table[entry].ext, request.ext, 3) == 0)
                 {
                     return 1;
                 }
@@ -183,14 +193,16 @@ int8_t write(struct FAT32DriverRequest request)
             }
 
             // IF CURRENT DIR_TABLE HAS MORE THAN 1 CLUSTER, CHECK IT!
-            if (driver_state.fat_table.cluster_map[currentParentClusterNumber] != FAT32_FAT_END_OF_FILE && entry != (CLUSTER_SIZE / sizeof(struct FAT32DirectoryEntry))){
+            if (driver_state.fat_table.cluster_map[currentParentClusterNumber] != FAT32_FAT_END_OF_FILE && entry != (CLUSTER_SIZE / sizeof(struct FAT32DirectoryEntry)))
+            {
                 read_clusters((void *)&driver_state.dir_table_buf, driver_state.fat_table.cluster_map[currentParentClusterNumber], 1);
                 entry = 0;
             }
         }
-       
-        if (isFolder){
-                
+
+        if (isFolder)
+        {
+
             // create sub directory table from parent
             struct FAT32DirectoryTable new_table;
 
@@ -199,11 +211,11 @@ int8_t write(struct FAT32DriverRequest request)
 
             // write the new_table to cluster
             write_clusters(&new_table, i, 1);
-            
+
             // add directory entry to parent
             struct FAT32DirectoryEntry new_entry = new_table.table[0];
             new_entry.cluster_low = (uint16_t)(i & 0xFFFF); // points to parent dir
-            new_entry.access_date = (uint16_t)(i >> 16);
+            new_entry.cluster_high = (uint16_t)(i >> 16);
 
             // GANTI USER ATTRIBUTE ROOT/PARENT FOLDER JADI NOT EMPTY
             driver_state.dir_table_buf.table[0].user_attribute = UATTR_NOT_EMPTY;
@@ -218,9 +230,10 @@ int8_t write(struct FAT32DriverRequest request)
         }
         else
         {
-            int totalSize = request.buffer_size; 
+            int totalSize = request.buffer_size;
 
-            while (totalSize > 0){
+            while (totalSize > 0)
+            {
                 // fill the entry
                 struct FAT32DirectoryEntry *new_entry = (void *)&(driver_state.dir_table_buf.table[entry]);
                 memcpy(new_entry->name, request.name, 8);
@@ -236,12 +249,12 @@ int8_t write(struct FAT32DriverRequest request)
 
         return 0;
     }
-    else {
+    else
+    {
         return 2;
     }
 
     return -1;
-
 }
 
 int8_t read(struct FAT32DriverRequest request)
