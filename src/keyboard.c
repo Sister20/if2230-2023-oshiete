@@ -67,7 +67,7 @@ void keyboard_isr(void) {
                     newRow = 0, newCol = 0;
                 } else {
                     newRow = row - 1, newCol = VGA_WIDTH - 1;
-                    while (framebuffer_getchar(newRow, newCol - 1) == '\0') {
+                    while (newCol > 0 && framebuffer_getchar(newRow, newCol - 1) == '\0') {
                         newCol--;
                     }
                 }
@@ -75,7 +75,7 @@ void keyboard_isr(void) {
                 newRow = row, newCol = col - 1;
             }
             framebuffer_set_cursor(newRow, newCol);
-            framebuffer_write(newRow, newCol, ' ', DEFAULT_FG, DEFAULT_BG);
+            framebuffer_write(newRow, newCol, '\0', DEFAULT_FG, DEFAULT_BG);
         } else if (mapped_char == '\n') {
             if (row == VGA_HEIGHT - 1) {
                 framebuffer_scroll_down();
