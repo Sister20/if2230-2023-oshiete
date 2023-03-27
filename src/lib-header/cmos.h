@@ -15,7 +15,7 @@ struct time
     uint8_t day;
     uint8_t month;
     uint16_t year;
-};
+} __attribute__((packed));
 
 /**
  * cmos_read_rtc - Read the current date and time from the CMOS RTC
@@ -27,6 +27,6 @@ struct time
  * @param minute    Output parameter for the current minute (in BCD format)
  * @param second    Output parameter for the current second (in BCD format)
  */
-void cmos_read_rtc(time *t);
+void cmos_read_rtc(struct time *t);
 
 #endif

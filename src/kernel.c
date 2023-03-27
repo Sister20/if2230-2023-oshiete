@@ -6,6 +6,7 @@
 #include "lib-header/kernel_loader.h"
 #include "lib-header/splash.h"
 #include "lib-header/fat32.h"
+#include "lib-header/cmos.h"
 
 void kernel_setup(void)
 {
@@ -24,17 +25,6 @@ void kernel_setup(void)
     // write_blocks(fs_signature, 0, 1);
     initialize_filesystem_fat32();
 
-    uint8_t cbuf[sizeof(struct FAT32DirectoryTable)];
-
-    struct FAT32DriverRequest request = {
-        .buf = cbuf,
-        .name = "sayang u",
-        .ext = "kmu",
-        .parent_cluster_number = ROOT_CLUSTER_NUMBER,
-        .buffer_size = 0,
-    };
-
-    write(request);
     while (TRUE)
         ;
 }
