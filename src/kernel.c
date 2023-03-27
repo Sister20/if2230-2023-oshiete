@@ -28,8 +28,8 @@ void kernel_setup(void)
 
     struct FAT32DriverRequest request = {
         .buf = cbuf,
-        .name = "ikanaide",
-        .ext = "uwu",
+        .name = "sayang u",
+        .ext = "kmu",
         .parent_cluster_number = ROOT_CLUSTER_NUMBER,
         .buffer_size = 0,
     };
