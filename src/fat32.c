@@ -306,3 +306,80 @@ int8_t read(struct FAT32DriverRequest request)
     }
     return ret;
 }
+
+int8_t delete(struct FAT32DriverRequest request)
+{
+    // read parent cluster
+    read_clusters((void *)&driver_state.dir_table_buf, request.parent_cluster_number, 1);
+
+    // the parent cluster should be a directory cluster
+    if (driver_state.dir_table_buf.table[0].attribute == ATTR_SUBDIRECTORY)
+    {
+        return -1;
+    }
+
+    int8_t ret = 1; // initialize ret to not found
+
+    // traverse the parent directory from i = 1 bc i = 0 stores the information about the parent dir
+    for (int i = 1; i < (int)(CLUSTER_SIZE / sizeof(struct FAT32DirectoryEntry)); i++)
+    {
+        // current dir entry has the same name and extension as req
+        if (memcmp((void *)&driver_state.dir_table_buf.table[i].name, request.name, 8) == 0 && memcmp((void *)&driver_state.dir_table_buf.table[i].ext, request.ext, 3) == 0)
+        {
+            // current dir entry is a folder
+            if (driver_state.dir_table_buf.table[i].attribute == ATTR_SUBDIRECTORY)
+            {   
+                 
+
+                // folder is not empty
+                if (driver_state.dir_table_buf.table[i].user_attribute == UATTR_NOT_EMPTY) 
+                {
+                    return 2;
+                }
+                // folder is empty
+                else 
+                {
+                    // set to null in parent's directory table
+                    struct FAT32DirectoryEntry *new_entry = (void *)&(driver_state.dir_table_buf.table[i]);
+                    memcpy(new_entry->name, "\0\0\0\0\0\0\0\0", 8);
+                    memcpy(new_entry->ext, "\0\0\0", 3);
+                    new_entry->filesize = 0;
+
+                    // set to null in FAT
+                    write_clusters()
+
+
+
+
+                }
+
+
+            } 
+            // current dir entry is a file
+            else 
+            {
+                // set to null in parent's directory table
+                (void *)&driver_state.dir_table_buf.table[i].name = 
+
+
+                // set to null in FAT
+
+            }
+
+
+
+
+
+
+        }
+
+    }
+
+
+
+
+
+
+
+    return ret;
+}
