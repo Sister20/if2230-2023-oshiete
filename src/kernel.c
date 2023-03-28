@@ -7,10 +7,14 @@
 #include "lib-header/splash.h"
 #include "lib-header/fat32.h"
 #include "lib-header/cmos.h"
+#include "lib-header/idt.h"
+#include "lib-header/interrupt.h"
+#include "lib-header/keyboard.h"
 
-void kernel_setup(void)
-{
+void kernel_setup(void) {
     enter_protected_mode(&_gdt_gdtr);
+    pic_remap();
+    initialize_idt();
     framebuffer_clear();
 
     /* SPLASH SCREEN */

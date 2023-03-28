@@ -7,6 +7,12 @@
 #define CURSOR_PORT_CMD 0x03D4
 #define CURSOR_PORT_DATA 0x03D5
 
+#define DEFAULT_FG VGA_COLOR_WHITE
+#define DEFAULT_BG VGA_COLOR_BLACK
+
+static const size_t VGA_WIDTH = 80;                            // width
+static const size_t VGA_HEIGHT = 25;                           // height
+
 /**
  * Terminal framebuffer
  * Resolution: 80x25
@@ -26,6 +32,8 @@
  * @param bg  Background color
  */
 void framebuffer_write(uint8_t row, uint8_t col, char c, uint8_t fg, uint8_t bg);
+
+uint16_t framebuffer_get_cursor();
 
 /**
  * Set cursor to specified location. Row and column starts from 0
@@ -63,5 +71,9 @@ enum vga_color
 };
 
 uint16_t framebuffer_set_entry(char c, enum vga_color fg, enum vga_color bg);
+
+char framebuffer_getchar(uint8_t row, uint8_t col);
+
+void framebuffer_scroll_down();
 
 #endif
