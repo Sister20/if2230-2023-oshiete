@@ -29,7 +29,7 @@ void kernel_setup(void)
     struct ClusterBuffer cbuf[5];
     for (uint32_t i = 0; i < 5; i++)
         for (uint32_t j = 0; j < CLUSTER_SIZE; j++)
-            cbuf[i].buf[j] = i;
+            cbuf[i].buf[j] = i + 'a';
 
     // struct FAT32DriverRequest request = {
     //     .buf = cbuf,
