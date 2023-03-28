@@ -6,6 +6,7 @@
 #include "lib-header/kernel_loader.h"
 #include "lib-header/splash.h"
 #include "lib-header/fat32.h"
+#include "lib-header/cmos.h"
 
 void kernel_setup(void)
 {

@@ -2,6 +2,7 @@
 #include "lib-header/fat32.h"
 #include "lib-header/disk.h"
 #include "lib-header/stdmem.h"
+#include "lib-header/cmos.h"
 
 // FAT32 - IF2230 edition"
 const uint8_t fs_signature[BLOCK_SIZE] = {
@@ -19,14 +20,18 @@ uint32_t cluster_to_lba(uint32_t cluster)
 bool is_empty_storage(void)
 {
     uint8_t boot_sector[BLOCK_SIZE];
-    read_blocks(boot_sector, 0, 1);
+    read_blocks(boot_sector, BOOT_SECTOR, 1);
     return memcmp(boot_sector, fs_signature, sizeof(fs_signature));
 };
 
 void init_directory_table(struct FAT32DirectoryTable *dir_table, char *name, uint32_t parent_dir_cluster)
 {
     struct FAT32DirectoryEntry *entry = &(dir_table->table[0]); // updates index 0
+    struct time t;
+    cmos_read_rtc(&t);
     memcpy(entry->name, name, 8);
+    entry->create_time = t.hour << 11 | t.minute << 5 | t.second / 2;
+    entry->create_date = (t.year - 1980) << 9 | t.month << 5 | t.day;
     entry->cluster_low = (uint16_t)(parent_dir_cluster & 0xFFFF); // points to parent dir
     entry->cluster_high = (uint16_t)(parent_dir_cluster >> 16);
     entry->attribute = ATTR_SUBDIRECTORY;
