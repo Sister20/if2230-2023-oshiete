@@ -2,6 +2,7 @@
 #include "lib-header/fat32.h"
 #include "lib-header/disk.h"
 #include "lib-header/stdmem.h"
+#include "lib-header/cmos.h"
 
 // FAT32 - IF2230 edition"
 const uint8_t fs_signature[BLOCK_SIZE] = {
@@ -19,18 +20,24 @@ uint32_t cluster_to_lba(uint32_t cluster)
 bool is_empty_storage(void)
 {
     uint8_t boot_sector[BLOCK_SIZE];
-    read_blocks(boot_sector, 0, 1);
+    read_blocks(boot_sector, BOOT_SECTOR, 1);
     return memcmp(boot_sector, fs_signature, sizeof(fs_signature));
 };
 
 void init_directory_table(struct FAT32DirectoryTable *dir_table, char *name, uint32_t parent_dir_cluster)
 {
     struct FAT32DirectoryEntry *entry = &(dir_table->table[0]); // updates index 0
+
+    struct time t;
+    cmos_read_rtc(&t);
     memcpy(entry->name, name, 8);
+    entry->create_time = t.hour << 8 | t.minute;
+    entry->create_date = t.year << 9 | t.month << 5 | t.day;
     entry->cluster_low = (uint16_t)(parent_dir_cluster & 0xFFFF); // points to parent dir
     entry->cluster_high = (uint16_t)(parent_dir_cluster >> 16);
     entry->attribute = ATTR_SUBDIRECTORY;
     entry->filesize = 0;
+    entry->undelete = 1;
 };
 
 void create_fat32(void)
@@ -98,21 +105,24 @@ int8_t read_directory(struct FAT32DriverRequest request)
     for (int i = 1; i < (int)(CLUSTER_SIZE / sizeof(struct FAT32DirectoryEntry)); i++)
     {
         // current dir entry has the same name as req
-        if (memcmp((void *)&driver_state.dir_table_buf.table[i].name, request.name, 8) == 0)
+        if (memcmp((void *)&driver_state.dir_table_buf.table[i].name, request.name, 8) == 0 && driver_state.dir_table_buf.table[i].undelete)
         {
             ret = 1;
             //  current dir entry is a subdir
             if (driver_state.dir_table_buf.table[i].attribute == ATTR_SUBDIRECTORY)
             {
                 // copies the dir table to buf
-
                 int fragment_ctr = 0;
                 uint32_t dir_cluster_number;
                 // struct FAT32DirectoryTable *dir_table = (struct FAT32DirectoryTable *)request.buf;
                 dir_cluster_number = (driver_state.dir_table_buf.table[i].cluster_high << 16) | driver_state.dir_table_buf.table[i].cluster_low;
                 ret = 0;
 
-                // check if the dir is fragmented
+                struct time t;
+                cmos_read_rtc(&t);
+                driver_state.dir_table_buf.table[i].create_time = t.hour << 8 | t.minute;
+                driver_state.dir_table_buf.table[i].create_date = t.year << 9 | t.month << 5 | t.day;
+                write_clusters((void *)&driver_state.dir_table_buf, request.parent_cluster_number, 1);
 
                 // read the fat
                 read_clusters((void *)&driver_state.fat_table, FAT_CLUSTER_NUMBER, 1);
@@ -189,14 +199,8 @@ int8_t write(struct FAT32DriverRequest request)
             // FIND WHICH ENTRY TO INSERT
             while (indexToCheck < (CLUSTER_SIZE / sizeof(struct FAT32DirectoryEntry)))
             {
-                // CHECK IF IS FOLDER AND EXIST IN PARENT DIRECTORY
-                if (isFolder && (memcmp((void *)driver_state.dir_table_buf.table[indexToCheck].name, request.name, 8) == 0) && (driver_state.dir_table_buf.table[indexToCheck].attribute == ATTR_SUBDIRECTORY))
-                {
-                    return 1;
-                }
-
-                // CHECK IF IS FILE AND EXIST IN PARENT DIRECTORY
-                if (!isFolder && memcmp((void *)driver_state.dir_table_buf.table[indexToCheck].name, request.name, 8) == 0 && memcmp((void *)driver_state.dir_table_buf.table[indexToCheck].ext, request.ext, 3) == 0)
+                // CHECK IF FILE OR FOLDER EXIST IN PARENT DIRECTORY
+                if (memcmp((void *)driver_state.dir_table_buf.table[indexToCheck].name, request.name, 8) == 0 && memcmp((void *)driver_state.dir_table_buf.table[indexToCheck].ext, request.ext, 3) == 0)
                 {
                     return 1;
                 }
@@ -205,7 +209,7 @@ int8_t write(struct FAT32DriverRequest request)
                 if (!foundEntry)
                 {
                     // IF CURRENT ENTRY IS EMPTY, USE THIS ENTRY
-                    if (driver_state.dir_table_buf.table[entry].name[0] == '\0')
+                    if (!driver_state.dir_table_buf.table[entry].undelete)
                     {
                         foundEntry = 1;
                     }
@@ -233,7 +237,6 @@ int8_t write(struct FAT32DriverRequest request)
 
         if (isFolder)
         {
-
             // create sub directory table from parent
             struct FAT32DirectoryTable new_table;
 
@@ -266,10 +269,15 @@ int8_t write(struct FAT32DriverRequest request)
             struct FAT32DirectoryEntry *new_entry = (void *)&(driver_state.dir_table_buf.table[entry]);
             memcpy(new_entry->name, request.name, 8);
             memcpy(new_entry->ext, request.ext, 3);
-            new_entry->cluster_high = (uint16_t)(currentParentClusterNumber >> 16);
-            new_entry->cluster_low = (uint16_t)(currentParentClusterNumber & 0xFFFF);
+            new_entry->cluster_high = (uint16_t)(clusterIndex >> 16);
+            new_entry->cluster_low = (uint16_t)(clusterIndex & 0xFFFF);
             new_entry->filesize = totalSize;
             new_entry->user_attribute = UATTR_NOT_EMPTY;
+            new_entry->undelete = 1;
+            struct time t;
+            cmos_read_rtc(&t);
+            new_entry->create_time = t.hour << 8 | t.minute;
+            new_entry->create_date = t.year << 9 | t.month << 5 | t.day;
 
             // GANTI USER ATTRIBUTE ROOT/PARENT FOLDER JADI NOT EMPTY
             driver_state.dir_table_buf.table[0].user_attribute = UATTR_NOT_EMPTY;
@@ -317,7 +325,7 @@ int8_t read(struct FAT32DriverRequest request)
     read_clusters((void *)&driver_state.dir_table_buf, request.parent_cluster_number, 1);
 
     // the parent cluster should be a directory cluster
-    if (driver_state.dir_table_buf.table[0].attribute == ATTR_SUBDIRECTORY)
+    if (driver_state.dir_table_buf.table[0].attribute != ATTR_SUBDIRECTORY)
     {
         return -1;
     }
@@ -328,14 +336,14 @@ int8_t read(struct FAT32DriverRequest request)
     for (int i = 1; i < (int)(CLUSTER_SIZE / sizeof(struct FAT32DirectoryEntry)); i++)
     {
         // current dir entry has the same name as req
-        if (memcmp((void *)&driver_state.dir_table_buf.table[i].name, request.name, 8) == 0)
+        if (memcmp((void *)&driver_state.dir_table_buf.table[i].name, request.name, 8) == 0 && driver_state.dir_table_buf.table[i].undelete)
         {
             if (driver_state.dir_table_buf.table[i].attribute == ATTR_SUBDIRECTORY)
             {
                 ret = 1;
             }
             //  current dir entry is the searched file
-            else if (driver_state.dir_table_buf.table[i].ext == request.ext)
+            else if (memcmp((void*)&driver_state.dir_table_buf.table[i].ext,request.ext,3) == 0)
             {
 
                 if (request.buffer_size < driver_state.dir_table_buf.table[i].filesize)
@@ -351,9 +359,14 @@ int8_t read(struct FAT32DriverRequest request)
                 // struct ClusterBuffer *dir_table = (struct ClusterBuffer *)request.buf;
                 ret = 0;
 
+                struct time t;
+                cmos_read_rtc(&t);
+                driver_state.dir_table_buf.table[i].create_time = t.hour << 8 | t.minute;
+                driver_state.dir_table_buf.table[i].create_date = t.year << 9 | t.month << 5 | t.day;
+                write_clusters((void *)&driver_state.dir_table_buf, request.parent_cluster_number, 1);
+
                 do
                 {
-                    read_clusters(request.buf + fragment_ctr * CLUSTER_SIZE, dir_cluster_number, 1);
                     if (fragment_ctr == 0)
                     {
                         dir_cluster_number = (driver_state.dir_table_buf.table[i].cluster_high << 16) | driver_state.dir_table_buf.table[i].cluster_low;
@@ -362,6 +375,9 @@ int8_t read(struct FAT32DriverRequest request)
                     {
                         dir_cluster_number = driver_state.fat_table.cluster_map[dir_cluster_number];
                     }
+
+                    read_clusters(request.buf + fragment_ctr * CLUSTER_SIZE, dir_cluster_number, 1);
+
                     fragment_ctr++;
                     request.buffer_size -= sizeof(struct ClusterBuffer);
                 } while (dir_cluster_number != FAT32_FAT_END_OF_FILE);
