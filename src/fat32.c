@@ -200,7 +200,10 @@ int8_t write(struct FAT32DriverRequest request)
             while (indexToCheck < (CLUSTER_SIZE / sizeof(struct FAT32DirectoryEntry)))
             {
                 // CHECK IF FILE OR FOLDER EXIST IN PARENT DIRECTORY
-                if (memcmp((void *)driver_state.dir_table_buf.table[indexToCheck].name, request.name, 8) == 0 && memcmp((void *)driver_state.dir_table_buf.table[indexToCheck].ext, request.ext, 3) == 0)
+                if (isFolder && (memcmp((void *)driver_state.dir_table_buf.table[indexToCheck].name,request.name, 8) == 0) && (driver_state.dir_table_buf.table[indexToCheck].attribute == ATTR_SUBDIRECTORY) && driver_state.dir_table_buf.table[indexToCheck].undelete){
+                    return 1;
+                }
+                if (!isFolder && memcmp((void *)driver_state.dir_table_buf.table[indexToCheck].name,request.name, 8) == 0 &&  memcmp((void *)driver_state.dir_table_buf.table[indexToCheck].ext,request.ext, 3) == 0 && driver_state.dir_table_buf.table[indexToCheck].undelete)
                 {
                     return 1;
                 }
@@ -407,13 +410,13 @@ int8_t delete(struct FAT32DriverRequest request)
         return UNKOWN_REQUEST_TYPE_RETURN;
     }
 
-    uint32_t i = 1;
+    bool done = 0;
     int currentClusterNumber = request.parent_cluster_number;
 
-    while (i == 1)
+    while (!done)
     {
         // traverse the parent directory from i = 1 bc i = 0 stores the information about the parent dir
-        for (i ; i < (int)(CLUSTER_SIZE / sizeof(struct FAT32DirectoryEntry)); i++)
+        for (int i = 1 ; i < (int)(CLUSTER_SIZE / sizeof(struct FAT32DirectoryEntry)); i++)
         {
             bool current_entry_has_same_name = memcmp((void *)&driver_state.dir_table_buf.table[i].name, request.name, 8) == 0;
             bool current_entry_has_same_extension = memcmp((void *)&driver_state.dir_table_buf.table[i].ext, request.ext, 3) == 0;
@@ -432,16 +435,17 @@ int8_t delete(struct FAT32DriverRequest request)
                 {
                     // set to null in parent's directory table
                     struct FAT32DirectoryEntry *new_entry = (void *)&(driver_state.dir_table_buf.table[i]);
-                    memcpy(new_entry->name, "\0\0\0\0\0\0\0\0", 8);
-                    memcpy(new_entry->ext, "\0\0\0", 3);
-                    new_entry->filesize = 0;
-                    new_entry->undelete = 0;
+                    // memcpy(new_entry->name, "\0\0\0\0\0\0\0\0", 8);
+                    // memcpy(new_entry->ext, "\0\0\0", 3);
+                    // new_entry->filesize = 0;
+                    new_entry->undelete = 0;;
 
-                    // set to null in FAT                    
-                    int fragment_ctr = 0;
+                    // find the clusters of the data in FAT
                     uint32_t dir_cluster_number = (driver_state.dir_table_buf.table[i].cluster_high << 16) | driver_state.dir_table_buf.table[i].cluster_low;
                     uint32_t next_cluster_number = driver_state.fat_table.cluster_map[dir_cluster_number];
+
                     driver_state.fat_table.cluster_map[dir_cluster_number] = 0;
+
                     while (next_cluster_number != FAT32_FAT_END_OF_FILE)
                     {
                         dir_cluster_number = next_cluster_number;
@@ -450,34 +454,51 @@ int8_t delete(struct FAT32DriverRequest request)
                     }
 
                     // check if there are any objects in parent
-                    bool any_valid_file = 0;
                     int dir_table_length = (int) CLUSTER_SIZE/sizeof(struct FAT32DirectoryEntry);
 
                     int currentClusterNumber1 = request.parent_cluster_number;
-                    int j = 1;
-                    while (j == 1)
-                    {
-                        for (j; j < dir_table_length && !any_valid_file; j++)
-                        {
-                            any_valid_file = driver_state.dir_table_buf.table[j].undelete;
+                    bool check_all_dir_table = 0;
+                    bool not_empty = 0;
+                    while(!check_all_dir_table){
+                        for (int i = 0 ;i< dir_table_length;i++){
+                            // found a file
+                            if(driver_state.dir_table_buf.table[i].undelete){
+                                check_all_dir_table = 1;
+                                not_empty = 1;
+                                break;
+                            }
                         }
-                        // IF CURRENT DIR_TABLE HAS MORE THAN 1 CLUSTER, CHECK IT!
-                        if (driver_state.fat_table.cluster_map[currentClusterNumber1] != FAT32_FAT_END_OF_FILE)
+                        if (driver_state.fat_table.cluster_map[currentClusterNumber1] != FAT32_FAT_END_OF_FILE && !not_empty)
                         {
                             read_clusters((void *)&driver_state.dir_table_buf, driver_state.fat_table.cluster_map[currentClusterNumber1], 1);
                             currentClusterNumber1 = driver_state.fat_table.cluster_map[currentClusterNumber1];
-                            j = 1;
+                            check_all_dir_table = 1;
                         } 
                     }
+                    // int j = 1;
+                    // while (j == 1)
+                    // {
+                    //     for (j; j < dir_table_length && !any_valid_file; j++)
+                    //     {
+                    //         any_valid_file = driver_state.dir_table_buf.table[j].undelete;
+                    //     }
+                    //     // IF CURRENT DIR_TABLE HAS MORE THAN 1 CLUSTER, CHECK IT!
+                    //     if (driver_state.fat_table.cluster_map[currentClusterNumber1] != FAT32_FAT_END_OF_FILE)
+                    //     {
+                    //         read_clusters((void *)&driver_state.dir_table_buf, driver_state.fat_table.cluster_map[currentClusterNumber1], 1);
+                    //         currentClusterNumber1 = driver_state.fat_table.cluster_map[currentClusterNumber1];
+                    //         j = 1;
+                    //     } 
+                    // }
 
-                    if(any_valid_file)
-                    {
-                        driver_state.dir_table_buf.table[i].user_attribute = UATTR_NOT_EMPTY;
-                    }
-                    else 
+                    if(!not_empty)
                     {
                         driver_state.dir_table_buf.table[i].user_attribute = 0;
                     }
+                    // else 
+                    // {
+                    //     driver_state.dir_table_buf.table[i].user_attribute = 0;
+                    // }
 
                     // write to parent's directory table and FAT
                     write_clusters((void*) &driver_state.dir_table_buf, request.parent_cluster_number, 1);
@@ -487,13 +508,17 @@ int8_t delete(struct FAT32DriverRequest request)
                 }
             }
         }
+
+        done = 1;
+
         // IF CURRENT DIR_TABLE HAS MORE THAN 1 CLUSTER, CHECK IT!
         if (driver_state.fat_table.cluster_map[currentClusterNumber] != FAT32_FAT_END_OF_FILE)
         {
             read_clusters((void *)&driver_state.dir_table_buf, driver_state.fat_table.cluster_map[currentClusterNumber], 1);
             currentClusterNumber = driver_state.fat_table.cluster_map[currentClusterNumber];
-            i = 1;
+            done = 0;
         }
+
     }
     return REQUEST_NAME_NOT_FOUND_RETURN;
 }

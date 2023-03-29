@@ -35,11 +35,9 @@ struct KeyboardDriverState {
     bool    keyboard_input_on;
     uint8_t buffer_index;
     char    keyboard_buffer[KEYBOARD_BUFFER_SIZE];
+    bool    shift_pressed;
+    bool    capslock_activated;
 } __attribute((packed));
-
-
-
-
 
 /* -- Driver Interfaces -- */
 
