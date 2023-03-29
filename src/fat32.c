@@ -364,8 +364,8 @@ int8_t read(struct FAT32DriverRequest request)
 
                 struct time t;
                 cmos_read_rtc(&t);
-                driver_state.dir_table_buf.table[i].create_time = t.hour << 8 | t.minute;
-                driver_state.dir_table_buf.table[i].create_date = t.year << 9 | t.month << 5 | t.day;
+
+                driver_state.dir_table_buf.table[i].access_date = t.year << 9 | t.month << 5 | t.day;
                 write_clusters((void *)&driver_state.dir_table_buf, request.parent_cluster_number, 1);
 
                 do
