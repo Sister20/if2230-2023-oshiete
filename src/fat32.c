@@ -281,6 +281,7 @@ int8_t write(struct FAT32DriverRequest request)
             new_entry->cluster_high = (uint16_t)(clusterIndex >> 16);
             new_entry->cluster_low = (uint16_t)(clusterIndex & 0xFFFF);
             new_entry->filesize = totalSize;
+            new_entry->attribute = 0;
             new_entry->user_attribute = UATTR_NOT_EMPTY;
             new_entry->undelete = 1;
             struct time t;
@@ -439,13 +440,8 @@ int8_t delete(struct FAT32DriverRequest request)
                 }
                 else // If the entry is an empty folder or a file, proceed to delete
                 {
-                    // set to null in parent's directory table
-                    struct FAT32DirectoryEntry *new_entry = (void *)&(driver_state.dir_table_buf.table[i]);
-                    // memcpy(new_entry->name, "\0\0\0\0\0\0\0\0", 8);
-                    // memcpy(new_entry->ext, "\0\0\0", 3);
-                    // new_entry->filesize = 0;
-                    new_entry->undelete = 0;;
-
+                    
+                    
                     // find the clusters of the data in FAT
                     uint32_t dir_cluster_number = (driver_state.dir_table_buf.table[i].cluster_high << 16) | driver_state.dir_table_buf.table[i].cluster_low;
                     uint32_t next_cluster_number = driver_state.fat_table.cluster_map[dir_cluster_number];
@@ -505,6 +501,10 @@ int8_t delete(struct FAT32DriverRequest request)
                     // {
                     //     driver_state.dir_table_buf.table[i].user_attribute = 0;
                     // }
+
+                    // set to null in parent's directory table
+                    struct FAT32DirectoryEntry new_entry = {0};
+                    driver_state.dir_table_buf.table[i] = new_entry;
 
                     // write to parent's directory table and FAT
                     write_clusters((void*) &driver_state.dir_table_buf, request.parent_cluster_number, 1);
