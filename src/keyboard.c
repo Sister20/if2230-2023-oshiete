@@ -4,10 +4,12 @@
 #include "lib-header/stdmem.h"
 
 static struct KeyboardDriverState keyboard_state = {
-    FALSE, // read_extended_mode
-    TRUE,  // keyboard_input_on
-    0,     // buffer_index
-    {'\0'} // keyboard_buffer
+    FALSE,  // read_extended_mode
+    TRUE,   // keyboard_input_on
+    0,      // buffer_index
+    {'\0'}, // keyboard_buffer
+    FALSE,  // shift_pressed
+    FALSE   // capslock_activated
 };
 
 const char keyboard_scancode_1_to_ascii_map[256] = {
@@ -39,7 +41,7 @@ void keyboard_state_deactivate(void) {
 }
 
 void get_keyboard_buffer(char *buf) {
-    for (int i = 0; i < KEYBOARD_BUFFER_SIZE; i++) buf[i] = keyboard_state.keyboard_buffer[i];
+    memcpy(buf, keyboard_state.keyboard_buffer, keyboard_state.buffer_index);
 }
 
 bool is_keyboard_blocking(void) {
@@ -58,7 +60,13 @@ void keyboard_isr(void) {
         uint8_t row = currentPos / VGA_WIDTH, col = currentPos % VGA_WIDTH;
 
         // Action
-        if (mapped_char == '\0') {
+        if (scancode == 0x2A || scancode == 0x36) {
+            keyboard_state.shift_pressed = TRUE;
+        } else if (scancode == 0xAA || scancode == 0xB6) {
+            keyboard_state.shift_pressed = FALSE;
+        } else if (scancode == 0x3A) {
+            keyboard_state.capslock_activated = !keyboard_state.capslock_activated;
+        } else if (mapped_char == '\0') {
 
         } else if (mapped_char == '\b') {
             uint8_t newRow, newCol;
@@ -83,8 +91,15 @@ void keyboard_isr(void) {
             } else {
                 framebuffer_set_cursor(row + 1, 0);
             }
+            keyboard_state.buffer_index = 0;
         } else {
+            if (mapped_char >= 'a' && mapped_char <= 'z' && (keyboard_state.shift_pressed ^ keyboard_state.capslock_activated)) {
+                mapped_char = mapped_char + 'A' - 'a';
+            }
+
             framebuffer_write(row, col, mapped_char, DEFAULT_FG, DEFAULT_BG);
+            keyboard_state.keyboard_buffer[keyboard_state.buffer_index++] = mapped_char;
+
             if (row == VGA_HEIGHT - 1 && col == VGA_WIDTH - 1) {
                 framebuffer_scroll_down();
                 framebuffer_set_cursor(row, 0);
