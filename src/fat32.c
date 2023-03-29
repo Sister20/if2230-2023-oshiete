@@ -38,16 +38,22 @@ void init_directory_table(struct FAT32DirectoryTable *dir_table, char *name, uin
     entry->attribute = ATTR_SUBDIRECTORY;
     entry->filesize = 0;
     entry->undelete = 1;
+
+    // for (uint32_t i = 1; i < CLUSTER_SIZE / sizeof(struct FAT32DirectoryEntry); i++)
+    // {
+    //     struct FAT32DirectoryEntry entry = {0};
+    //     dir_table->table[i] = entry;
+    // }
 };
 
 void create_fat32(void)
 {
     write_blocks(fs_signature, BOOT_SECTOR, 1); // write fs_signature into boot sector
 
-    struct FAT32FileAllocationTable fat;
+    struct FAT32FileAllocationTable fat = {0};
 
     // initialize root
-    struct FAT32DirectoryTable root_dir_table;
+    struct FAT32DirectoryTable root_dir_table = {0};
     init_directory_table(&root_dir_table, "root\0\0\0\0", ROOT_CLUSTER_NUMBER);
 
     fat.cluster_map[0] = (uint32_t)CLUSTER_0_VALUE;
@@ -67,12 +73,12 @@ void initialize_filesystem_fat32(void)
     }
 
     // load fat to driver state
-    struct FAT32FileAllocationTable fat;
+    struct FAT32FileAllocationTable fat = {0};
     read_clusters(&fat, FAT_CLUSTER_NUMBER, 1);
     driver_state.fat_table = fat;
 
     // load root directory table to driver state
-    struct FAT32DirectoryTable root_dir_table;
+    struct FAT32DirectoryTable root_dir_table = {0};
     read_clusters(&root_dir_table, ROOT_CLUSTER_NUMBER, 1);
     driver_state.dir_table_buf = root_dir_table;
 }
@@ -195,15 +201,15 @@ int8_t write(struct FAT32DriverRequest request)
 
         while (indexToCheck == 0)
         {
-
             // FIND WHICH ENTRY TO INSERT
             while (indexToCheck < (CLUSTER_SIZE / sizeof(struct FAT32DirectoryEntry)))
             {
                 // CHECK IF FILE OR FOLDER EXIST IN PARENT DIRECTORY
-                if (isFolder && (memcmp((void *)driver_state.dir_table_buf.table[indexToCheck].name,request.name, 8) == 0) && (driver_state.dir_table_buf.table[indexToCheck].attribute == ATTR_SUBDIRECTORY) && driver_state.dir_table_buf.table[indexToCheck].undelete){
+                if (isFolder && (memcmp((void *)driver_state.dir_table_buf.table[indexToCheck].name,request.name, 8) == 0) && (driver_state.dir_table_buf.table[indexToCheck].attribute == ATTR_SUBDIRECTORY) && driver_state.dir_table_buf.table[indexToCheck].undelete && indexToCheck != 0){
                     return 1;
                 }
-                if (!isFolder && memcmp((void *)driver_state.dir_table_buf.table[indexToCheck].name,request.name, 8) == 0 &&  memcmp((void *)driver_state.dir_table_buf.table[indexToCheck].ext,request.ext, 3) == 0 && driver_state.dir_table_buf.table[indexToCheck].undelete)
+
+                if (!isFolder && memcmp((void *)driver_state.dir_table_buf.table[indexToCheck].name,request.name, 8) == 0 &&  memcmp((void *)driver_state.dir_table_buf.table[indexToCheck].ext,request.ext, 3) == 0 && driver_state.dir_table_buf.table[indexToCheck].undelete && indexToCheck != 0)
                 {
                     return 1;
                 }
@@ -212,7 +218,7 @@ int8_t write(struct FAT32DriverRequest request)
                 if (!foundEntry)
                 {
                     // IF CURRENT ENTRY IS EMPTY, USE THIS ENTRY
-                    if (!driver_state.dir_table_buf.table[entry].undelete)
+                    if (!driver_state.dir_table_buf.table[entry].undelete && entry != 0)
                     {
                         foundEntry = 1;
                     }
@@ -241,7 +247,7 @@ int8_t write(struct FAT32DriverRequest request)
         if (isFolder)
         {
             // create sub directory table from parent
-            struct FAT32DirectoryTable new_table;
+            struct FAT32DirectoryTable new_table = {0};
 
             // init new_table
             init_directory_table(&new_table, request.name, request.parent_cluster_number);
@@ -262,8 +268,8 @@ int8_t write(struct FAT32DriverRequest request)
             driver_state.fat_table.cluster_map[clusterIndex] = FAT32_FAT_END_OF_FILE;
 
             // write the driver_state
-            write_clusters((void *)&driver_state.fat_table, FAT_CLUSTER_NUMBER, 1);
             write_clusters((void *)&driver_state.dir_table_buf, currentParentClusterNumber, 1);
+            write_clusters((void *)&driver_state.fat_table, FAT_CLUSTER_NUMBER, 1);
         }
         else
         {
