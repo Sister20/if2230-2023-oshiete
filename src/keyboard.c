@@ -91,7 +91,7 @@ void keyboard_isr(void) {
             } else {
                 framebuffer_set_cursor(row + 1, 0);
             }
-            keyboard_state.buffer_index = 0;
+            keyboard_state_deactivate();
         } else {
             if (mapped_char >= 'a' && mapped_char <= 'z' && (keyboard_state.shift_pressed ^ keyboard_state.capslock_activated)) {
                 mapped_char = mapped_char + 'A' - 'a';
