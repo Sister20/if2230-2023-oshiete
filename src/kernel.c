@@ -31,7 +31,6 @@ void kernel_setup(void) {
 
     // write_blocks(fs_signature, 0, 1);
     initialize_filesystem_fat32();
-    keyboard_state_activate();
 
     // // uint8_t cbuf[sizeof(struct FAT32DirectoryTable)];
 
@@ -94,5 +93,7 @@ void kernel_setup(void) {
     request.buffer_size = 5*CLUSTER_SIZE;
     read(request);   // Success read on file "daijoubu"
 
-    while (TRUE);
+    while (TRUE) {
+        keyboard_state_activate();
+    }
 }
