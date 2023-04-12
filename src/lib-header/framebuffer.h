@@ -3,15 +3,15 @@
 
 #include "lib-header/stdtype.h"
 
-#define MEMORY_FRAMEBUFFER (uint8_t *)0xB8000
+#define MEMORY_FRAMEBUFFER (uint8_t *)0xC00B 8000
 #define CURSOR_PORT_CMD 0x03D4
 #define CURSOR_PORT_DATA 0x03D5
 
 #define DEFAULT_FG VGA_COLOR_WHITE
 #define DEFAULT_BG VGA_COLOR_BLACK
 
-static const size_t VGA_WIDTH = 80;                            // width
-static const size_t VGA_HEIGHT = 25;                           // height
+static const size_t VGA_WIDTH = 80;  // width
+static const size_t VGA_HEIGHT = 25; // height
 
 /**
  * Terminal framebuffer
