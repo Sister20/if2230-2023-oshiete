@@ -84,6 +84,7 @@ void keyboard_isr(void) {
             }
             framebuffer_set_cursor(newRow, newCol);
             framebuffer_write(newRow, newCol, '\0', DEFAULT_FG, DEFAULT_BG);
+            if (keyboard_state.buffer_index > 0) keyboard_state.buffer_index--;
         } else if (mapped_char == '\n') {
             if (row == VGA_HEIGHT - 1) {
                 framebuffer_scroll_down();
