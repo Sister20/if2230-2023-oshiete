@@ -139,7 +139,7 @@ int8_t read_directory(struct FAT32DriverRequest request)
                     do
                     {
                         read_clusters(request.buf + fragment_ctr * sizeof(struct FAT32DirectoryTable), dir_cluster_number, 1);
-                        dir_cluster_number = dir_cluster_number = driver_state.fat_table.cluster_map[dir_cluster_number];
+                        dir_cluster_number = driver_state.fat_table.cluster_map[dir_cluster_number];
                         fragment_ctr++;
                         request.buffer_size -= sizeof(struct FAT32DirectoryTable);
                     } while (dir_cluster_number != FAT32_FAT_END_OF_FILE && request.buffer_size >= sizeof(struct FAT32DirectoryTable));
