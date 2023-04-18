@@ -32,7 +32,7 @@ void kernel_setup(void) {
         .ext                   = "uwu",
         .parent_cluster_number = ROOT_CLUSTER_NUMBER,
         .buffer_size           = 0,
-    } ;
+    };
 
     write(request);  // Create folder "ikanaide"
     memcpy(request.name, "kano1\0\0\0", 8);
