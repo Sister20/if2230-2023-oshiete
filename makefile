@@ -61,6 +61,6 @@ iso: kernel
 
 inserter:
 	@$(CC) -Wno-builtin-declaration-mismatch -g \
-		$(SOURCE_FOLDER)/stdmem.c $(SOURCE_FOLDER)/fat32.c \
+		$(SOURCE_FOLDER)/stdmem.c $(SOURCE_FOLDER)/fat32-no-cmos.c \
 		$(SOURCE_FOLDER)/external-inserter.c \
 		-o $(OUTPUT_FOLDER)/inserter
