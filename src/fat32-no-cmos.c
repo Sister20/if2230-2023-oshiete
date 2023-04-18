@@ -1,8 +1,12 @@
 #include <time.h>
-#include "lib-header/stdtype.h"
-#include "lib-header/fat32.h"
-#include "lib-header/disk.h"
-#include "lib-header/stdmem.h"
+// #include "lib-header/stdtype.h"
+#include <stdio.h>
+#include <string.h>
+// #include "lib-header/fat32-no-cmos.h"
+#include "external-inserter.c"
+// #include "lib-header/disk.h"
+// #include "lib-header/stdmem.h"
+// #include <stdbool.h>
 
 // FAT32 - IF2230 edition"
 const uint8_t fs_signature[BLOCK_SIZE] = {
