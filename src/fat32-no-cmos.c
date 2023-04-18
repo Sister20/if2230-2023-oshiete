@@ -35,11 +35,6 @@ const uint8_t fs_signature[BLOCK_SIZE] = {
     '\n',
 };
 
-uint32_t cluster_to_lba(uint32_t cluster)
-{
-    return cluster * CLUSTER_BLOCK_COUNT;
-}
-
 bool is_empty_storage(void)
 {
     uint8_t boot_sector[BLOCK_SIZE];
@@ -108,16 +103,6 @@ void initialize_filesystem_fat32(void)
     read_clusters(&root_dir_table, ROOT_CLUSTER_NUMBER, 1);
     driver_state.dir_table_buf = root_dir_table;
 }
-
-void write_clusters(const void *ptr, uint32_t cluster_number, uint8_t cluster_count)
-{
-    write_blocks(ptr, cluster_to_lba(cluster_number), cluster_count * CLUSTER_BLOCK_COUNT);
-};
-
-void read_clusters(void *ptr, uint32_t cluster_number, uint8_t cluster_count)
-{
-    read_blocks(ptr, cluster_to_lba(cluster_number), cluster_count * CLUSTER_BLOCK_COUNT);
-};
 
 int8_t read_directory(struct FAT32DriverRequest request)
 {
