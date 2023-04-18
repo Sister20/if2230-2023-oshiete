@@ -1,8 +1,6 @@
 #ifndef _FAT32_NO_CMOS_H
 #define _FAT32_NO_CMOS_H
 
-// #include "disk.h"
-// #include "stdtype.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -129,7 +127,6 @@ static volatile struct FAT32DriverState driver_state;
  */
 struct FAT32DriverRequest
 {
-
     void *buf;
     char name[8];
     char ext[3];
@@ -234,6 +231,11 @@ int8_t write(struct FAT32DriverRequest request);
  */
 int8_t delete(struct FAT32DriverRequest request);
 
+void initialize_filesystem_fat32(void);
+
 uint32_t findEmptyCluster();
+
+void read_blocks(void *ptr, uint32_t logical_block_address, uint8_t block_count);
+void write_blocks(const void *ptr, uint32_t logical_block_address, uint8_t block_count);
 
 #endif

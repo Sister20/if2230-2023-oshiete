@@ -3,13 +3,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "lib-header/fat32-no-cmos.h"
-// #include "lib-header/stdtype.h"
-
-// Usual gcc fixed width integer type
-// typedef u_int32_t uint32_t;
-// typedef u_int8_t  uint8_t;
-
-// Manual import from fat32.h, disk.h, & stdmem.h due some issue with size_t
 
 void *memcpy(void *restrict dest, const void *restrict src, size_t n);
 

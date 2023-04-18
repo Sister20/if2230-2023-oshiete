@@ -2,8 +2,8 @@
 // #include "lib-header/stdtype.h"
 #include <stdio.h>
 #include <string.h>
-// #include "lib-header/fat32-no-cmos.h"
-#include "external-inserter.c"
+#include "lib-header/fat32-no-cmos.h"
+// #include "external-inserter.c"
 // #include "lib-header/disk.h"
 // #include "lib-header/stdmem.h"
 // #include <stdbool.h>
