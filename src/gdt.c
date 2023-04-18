@@ -1,15 +1,10 @@
 #include "lib-header/stdtype.h"
 #include "lib-header/gdt.h"
 
-/**
- * global_descriptor_table, predefined GDT.
- * Initial SegmentDescriptor already set properly according to GDT definition in Intel Manual & OSDev.
- * Table entry : [{Null Descriptor}, {Kernel Code}, {Kernel Data (variable, etc)}, ...].
- */
-struct GlobalDescriptorTable global_descriptor_table = {
+static struct GlobalDescriptorTable global_descriptor_table = {
     .table = {
         {
-            // TODO : Implement
+            // TODO : Implement NULL DESCRIPTOR
             .segment_low = 0x00000000,
             .base_low =  0x0000,
             .base_mid =  0x00,
@@ -25,7 +20,7 @@ struct GlobalDescriptorTable global_descriptor_table = {
             .base_high = 0x00
         },
         {
-            // TODO : Implement
+            // TODO : Implement KERNEL CODE DESCRIPTOR
             .segment_low = 0xFFFF,
             .base_low = 0,
             .base_mid = 0,
@@ -35,13 +30,13 @@ struct GlobalDescriptorTable global_descriptor_table = {
             .segment_present = 1,
             .limit = 0xF,
             .avl = 0,
-            .code_segment = 1,
+            .code_segment = 0,
             .def_op_size = 1,
             .granularity = 1,
             .base_high = 0
         },
         {
-            // TODO : Implement
+            // TODO : Implement KERNEL DATA DESCIPTOR
             .segment_low = 0xFFFF,
             .base_low = 0,
             .base_mid = 0,
@@ -55,9 +50,61 @@ struct GlobalDescriptorTable global_descriptor_table = {
             .def_op_size = 1,
             .granularity = 1,
             .base_high = 0
-        }
+        },
+        {/* TODO: User Code Descriptor */
+            .segment_low = 0xFFFF,
+            .base_low = 0,
+            .base_mid = 0,
+            .type_bit = 0xA,
+            .non_system = 1,
+            .dpl = 0x3,
+            .segment_present = 1,
+            .limit = 0xF,
+            .avl = 0,
+            .code_segment = 0,
+            .def_op_size = 1,
+            .granularity = 1,
+            .base_high = 0
+        },
+        {/* TODO: User Data Descriptor */
+            .segment_low = 0xFFFF,
+            .base_low = 0,
+            .base_mid = 0,
+            .type_bit = 0x2,
+            .non_system = 1,
+            .dpl = 0x3,
+            .segment_present = 1,
+            .limit = 0xF,
+            .avl = 0,
+            .code_segment = 0,
+            .def_op_size = 1,
+            .granularity = 1,
+            .base_high = 0
+        },
+        {
+            .limit              = (sizeof(struct TSSEntry) & (0xF << 16)) >> 16,
+            .segment_low       = sizeof(struct TSSEntry),
+            .base_high         = 0,
+            .base_mid          = 0,
+            .base_low          = 0,
+            .non_system        = 0,    // S bit
+            .type_bit          = 0x9,
+            .dpl         = 0,    // DPL
+            .segment_present        = 1,    // P bit
+            .def_op_size        = 1,    // D/B bit
+            .code_segment         = 0,    // L bit
+            .granularity       = 0,    // G bit
+        },
+        {0}
     }
 };
+
+void gdt_install_tss(void) {
+    uint32_t base = (uint32_t) &_interrupt_tss_entry;
+    global_descriptor_table.table[5].base_high = (base & (0xFF << 24)) >> 24;
+    global_descriptor_table.table[5].base_mid  = (base & (0xFF << 16)) >> 16;
+    global_descriptor_table.table[5].base_low  = base & 0xFFFF;
+}
 
 /**
  * _gdt_gdtr, predefined system GDTR. 
