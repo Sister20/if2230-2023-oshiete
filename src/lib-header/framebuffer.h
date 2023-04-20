@@ -76,4 +76,6 @@ char framebuffer_getchar(uint8_t row, uint8_t col);
 
 void framebuffer_scroll_down();
 
+void puts(const char *s, size_t length, enum vga_color fg);
+
 #endif

@@ -66,3 +66,28 @@ void framebuffer_scroll_down() {
         }
     }
 }
+
+void puts(const char *s, size_t length, enum vga_color fg) {
+    for (size_t i = 0; i < length; i++) {
+        uint16_t cursor = framebuffer_get_cursor();
+        uint8_t row, col;
+
+        row = cursor / VGA_WIDTH; col = cursor % VGA_WIDTH;
+
+        if (s[i] == '\n') {
+            if (row == VGA_HEIGHT - 1) {
+                framebuffer_scroll_down();
+                framebuffer_set_cursor(row, 0);
+            } else {
+                framebuffer_set_cursor(row + 1, 0);
+            }
+        } else {
+            framebuffer_write(row, col, s[i], fg, DEFAULT_BG);
+            
+            if (row == VGA_HEIGHT - 1 && col == VGA_WIDTH - 1) {
+                framebuffer_scroll_down();
+            }
+            framebuffer_set_cursor(row, col + 1);
+        }
+    }
+}
