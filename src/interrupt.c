@@ -60,16 +60,22 @@ void syscall(struct CPURegister cpu, __attribute__((unused)) struct InterruptSta
         // Param:
         // cpu.ebx -> pointer request
         // cpu.ecx -> pointer retcode
+        struct FAT32DriverRequest request = *(struct FAT32DriverRequest*) cpu.ebx;
+        *((int8_t*) cpu.ecx) = read_directory(request);
     } else if (cpu.eax == 2) {
         // TODO: Panggil File System Write
         // Param:
         // cpu.ebx -> pointer request
         // cpu.ecx -> pointer retcode
+        struct FAT32DriverRequest request = *(struct FAT32DriverRequest*) cpu.ebx;
+        *((int8_t*) cpu.ecx) = write(request);
     } else if (cpu.eax == 3) {
         // TODO: Panggil File System Delete
         // Param:
         // cpu.ebx -> pointer request
         // cpu.ecx -> pointer retcode
+        struct FAT32DriverRequest request = *(struct FAT32DriverRequest*) cpu.ebx;
+        *((int8_t*) cpu.ecx) = delete(request);
     } else if (cpu.eax == 4) {
         keyboard_state_activate();
         __asm__("sti"); // Due IRQ is disabled when main_interrupt_handler() called
