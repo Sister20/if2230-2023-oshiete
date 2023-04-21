@@ -3,9 +3,10 @@
 #include "lib-header/stdmem.h"
 #include "lib-header/portio.h"
 
-static uint16_t *framebuffer = (uint16_t*) MEMORY_FRAMEBUFFER; // type cast to uint16
+static uint16_t *framebuffer = (uint16_t *)MEMORY_FRAMEBUFFER; // type cast to uint16
 
-uint16_t framebuffer_get_cursor() {
+uint16_t framebuffer_get_cursor()
+{
     uint16_t currentPos;
     out(CURSOR_PORT_CMD, 14);
     currentPos = in(CURSOR_PORT_DATA) << 8;
@@ -48,43 +49,60 @@ void framebuffer_clear(void)
 
 uint16_t framebuffer_set_entry(char c, enum vga_color fg, enum vga_color bg)
 {
-    return (uint16_t) c | (uint16_t) (fg | bg << 4) << 8;
+    return (uint16_t)c | (uint16_t)(fg | bg << 4) << 8;
 };
 
-char framebuffer_getchar(uint8_t row, uint8_t col) {
+char framebuffer_getchar(uint8_t row, uint8_t col)
+{
     return framebuffer[row * VGA_WIDTH + col] & 0xff;
 }
 
-void framebuffer_scroll_down() {
-    for (size_t i = 0; i < VGA_HEIGHT; i++) {
-        for (size_t j = 0; j < VGA_WIDTH; j++) {
-            if (i == VGA_HEIGHT - 1) {
+void framebuffer_scroll_down()
+{
+    for (size_t i = 0; i < VGA_HEIGHT; i++)
+    {
+        for (size_t j = 0; j < VGA_WIDTH; j++)
+        {
+            if (i == VGA_HEIGHT - 1)
+            {
                 framebuffer_write(i, j, '\0', DEFAULT_FG, DEFAULT_BG);
-            } else {
+            }
+            else
+            {
                 framebuffer_write(i, j, framebuffer_getchar(i + 1, j), DEFAULT_FG, DEFAULT_BG);
             }
         }
     }
 }
 
-void puts(const char *s, size_t length, enum vga_color fg) {
-    for (size_t i = 0; i < length; i++) {
+void puts_buff(const char *s, size_t length, enum vga_color fg)
+{
+    for (size_t i = 0; i < length; i++)
+    {
         uint16_t cursor = framebuffer_get_cursor();
         uint8_t row, col;
 
-        row = cursor / VGA_WIDTH; col = cursor % VGA_WIDTH;
+        row = cursor / VGA_WIDTH;
+        col = cursor % VGA_WIDTH;
 
-        if (s[i] == '\n') {
-            if (row == VGA_HEIGHT - 1) {
+        if (s[i] == '\n')
+        {
+            if (row == VGA_HEIGHT - 1)
+            {
                 framebuffer_scroll_down();
                 framebuffer_set_cursor(row, 0);
-            } else {
+            }
+            else
+            {
                 framebuffer_set_cursor(row + 1, 0);
             }
-        } else {
+        }
+        else
+        {
             framebuffer_write(row, col, s[i], fg, DEFAULT_BG);
-            
-            if (row == VGA_HEIGHT - 1 && col == VGA_WIDTH - 1) {
+
+            if (row == VGA_HEIGHT - 1 && col == VGA_WIDTH - 1)
+            {
                 framebuffer_scroll_down();
             }
             framebuffer_set_cursor(row, col + 1);
