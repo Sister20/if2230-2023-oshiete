@@ -233,4 +233,6 @@ int8_t delete(struct FAT32DriverRequest request);
 
 uint32_t findEmptyCluster();
 
+int8_t read_root_directory(struct FAT32DriverRequest request);
+
 #endif
