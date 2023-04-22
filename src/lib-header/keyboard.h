@@ -53,6 +53,8 @@ void get_keyboard_buffer(char *buf);
 // Check whether keyboard ISR is active or not - @return Equal with keyboard_input_on value
 bool is_keyboard_blocking(void);
 
+void reset_buffer();
+
 
 /* -- Keyboard Interrupt Service Routine -- */
 
