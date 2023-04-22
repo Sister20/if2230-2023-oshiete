@@ -8,6 +8,6 @@
 #include "../string.h"
 #include "../stdmem.h"
 
-void ls(struct Cwd cwd, struct FAT32DriverRequest *request, char* dir_name);
+void ls(struct CurrentWorkingDirectory cwd, struct FAT32DriverRequest *request, char *dir_name);
 
 #endif
