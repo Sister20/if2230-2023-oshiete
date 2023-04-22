@@ -13,7 +13,7 @@ int strcmp(char *str1, char *str2);
 
 void strcpy(char *dst, char *src);
 
-int strparse(char *input, char command[12][8]);
+int strparse(char *input, char output[12][128], char *delim);
 
 char *strncpy(char *dest, const char *src, size_t n);
 
