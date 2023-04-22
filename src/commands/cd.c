@@ -2,13 +2,13 @@
 
 void cd(struct CurrentWorkingDirectory *cwd, char *dir_path)
 {
-    char *new_dir = "\0\0\0\0\0\0\0\0\0\0\0";
+    char new_dir[12] = "\0";
     int8_t retcode = read_path(dir_path, cwd, new_dir);
     if (strlen(new_dir) > 8)
     {
         retcode = 3;
     }
-    if (retcode == 0)
+    if (retcode == 0 && new_dir[0] != '\0')
     {
         uint32_t found_cluster_number = 0;
         retcode = -1;
