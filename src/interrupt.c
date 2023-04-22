@@ -68,7 +68,7 @@ void syscall(struct CPURegister cpu, __attribute__((unused)) struct InterruptSta
         // cpu.ebx -> pointer request
         // cpu.ecx -> pointer retcode
         struct FAT32DriverRequest request = *(struct FAT32DriverRequest *)cpu.ebx;
-        *((int8_t *)cpu.ecx) = read_directory(request, (int *)cpu.edx);
+        *((int8_t *)cpu.ecx) = read_directory(request, (uint32_t *)cpu.edx);
     }
     else if (cpu.eax == 2)
     {
@@ -95,7 +95,7 @@ void syscall(struct CPURegister cpu, __attribute__((unused)) struct InterruptSta
         __asm__("sti"); // Due IRQ is disabled when main_interrupt_handler() called
         while (is_keyboard_blocking())
             ;
-        char buf[KEYBOARD_BUFFER_SIZE];
+        char buf[KEYBOARD_BUFFER_SIZE] = {'\0'};
         get_keyboard_buffer(buf);
         memcpy((char *)cpu.ebx, buf, cpu.ecx);
     }
@@ -108,7 +108,7 @@ void syscall(struct CPURegister cpu, __attribute__((unused)) struct InterruptSta
     {
         // read root directory
         struct FAT32DriverRequest request = *(struct FAT32DriverRequest *)cpu.ebx;
-        *((int8_t *)cpu.ecx) = read_root_directory(request, (int *)cpu.edx);
+        *((int8_t *)cpu.ecx) = read_root_directory(request);
     }
 }
 

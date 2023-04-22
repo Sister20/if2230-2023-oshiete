@@ -88,11 +88,11 @@ char *strncpy(char *dest, const char *src, size_t n)
     return ret;
 }
 
-int strparse(char *str, char command[12][8])
+int strparse(char *str, char command[12][128], char *delim)
 {
     for (int i = 0; i < 12; i++)
     {
-        for (int j = 0; j < 8; j++)
+        for (int j = 0; j < 128; j++)
         {
             command[i][j] = '\0';
         }
@@ -101,11 +101,11 @@ int strparse(char *str, char command[12][8])
     int i = 0;
 
     // Parse the string
-    token = strtok(str, " ");
-    while (token != NULL && i < 12)
+    token = strtok(str, delim);
+    while (token != NULL && i < 128)
     {
         // Copy the string to the array
-        strncpy(command[i], token, 8);
+        strncpy(command[i], token, strlen(token));
         // Increment the count and move to the next token
         i++;
         token = strtok(NULL, " ");
