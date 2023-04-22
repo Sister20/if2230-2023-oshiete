@@ -68,7 +68,7 @@ void syscall(struct CPURegister cpu, __attribute__((unused)) struct InterruptSta
         // cpu.ebx -> pointer request
         // cpu.ecx -> pointer retcode
         struct FAT32DriverRequest request = *(struct FAT32DriverRequest *)cpu.ebx;
-        *((int8_t *)cpu.ecx) = read_directory(request);
+        *((int8_t *)cpu.ecx) = read_directory(request, (int *)cpu.edx);
     }
     else if (cpu.eax == 2)
     {
@@ -108,7 +108,7 @@ void syscall(struct CPURegister cpu, __attribute__((unused)) struct InterruptSta
     {
         // read root directory
         struct FAT32DriverRequest request = *(struct FAT32DriverRequest *)cpu.ebx;
-        *((int8_t *)cpu.ecx) = read_root_directory(request);
+        *((int8_t *)cpu.ecx) = read_root_directory(request, (int *)cpu.edx);
     }
 }
 

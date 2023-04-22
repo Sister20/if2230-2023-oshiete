@@ -48,21 +48,22 @@ int main(void)
     if (retcode == 0)
         syscall(5, (uint32_t) "owo\n", 4, 0xF);
 
-    char buf[16];
     while (TRUE)
     {
+        char buf[16];
         puts("user@OShiete: ", VGA_COLOR_CYAN);
         pwd(cwd);
         syscall(4, (uint32_t)buf, 16, 0);
-        syscall(5, (uint32_t)buf, 16, 0xF);
+        // syscall(5, (uint32_t)buf, 16, 0xF);
         int command_args = strparse(buf, command);
         if (command_args > 0)
         {
             if (strcmp(command[0], "ls"))
             {
-                ls(cwd, &request, &retcode);
+                ls(cwd, &request, command[1]);
             }
         }
+        puts("\n", VGA_COLOR_BLACK);
     }
 
     return 0;

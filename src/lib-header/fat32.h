@@ -205,7 +205,7 @@ void read_clusters(void *ptr, uint32_t cluster_number, uint8_t cluster_count);
  *                buffer_size must be exactly sizeof(struct FAT32DirectoryTable)
  * @return Error code: 0 success - 1 not a file - 2 not enough buffer - 3 not found - -1 unknown
  */
-int8_t read_directory(struct FAT32DriverRequest request);
+int8_t read_directory(struct FAT32DriverRequest request, int *fragment_ctr);
 
 /**
  * FAT32 read, read a file from file system.
@@ -233,6 +233,6 @@ int8_t delete(struct FAT32DriverRequest request);
 
 uint32_t findEmptyCluster();
 
-int8_t read_root_directory(struct FAT32DriverRequest request);
+int8_t read_root_directory(struct FAT32DriverRequest request, int *fragment_ctr);
 
 #endif
