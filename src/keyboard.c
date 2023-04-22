@@ -48,10 +48,15 @@ bool is_keyboard_blocking(void) {
     return keyboard_state.keyboard_input_on;
 }
 
+void reset_buffer() {
+    for (size_t i = 0; i < KEYBOARD_BUFFER_SIZE; i++) keyboard_state.keyboard_buffer[i] = '\0';
+    keyboard_state.buffer_index = 0;
+}
+
 void keyboard_isr(void) {
-    if (!keyboard_state.keyboard_input_on)
-        keyboard_state.buffer_index = 0;
-    else {
+    if (!keyboard_state.keyboard_input_on) {
+        reset_buffer();
+    } else {
         uint8_t  scancode    = in(KEYBOARD_DATA_PORT);
         char     mapped_char = keyboard_scancode_1_to_ascii_map[scancode];
 

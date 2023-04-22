@@ -90,6 +90,7 @@ void syscall(struct CPURegister cpu, __attribute__((unused)) struct InterruptSta
     }
     else if (cpu.eax == 4)
     {
+        reset_buffer();
         keyboard_state_activate();
 
         __asm__("sti"); // Due IRQ is disabled when main_interrupt_handler() called
