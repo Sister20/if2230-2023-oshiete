@@ -57,19 +57,21 @@ char framebuffer_getchar(uint8_t row, uint8_t col)
     return framebuffer[row * VGA_WIDTH + col] & 0xff;
 }
 
-void framebuffer_scroll_down()
-{
-    for (size_t i = 0; i < VGA_HEIGHT; i++)
-    {
-        for (size_t j = 0; j < VGA_WIDTH; j++)
-        {
-            if (i == VGA_HEIGHT - 1)
-            {
+enum vga_color framebuffer_get_fg(uint8_t row, uint8_t col) {
+    return (framebuffer[row * VGA_WIDTH + col] >> 8) & 0x0f;
+}
+
+enum vga_color framebuffer_get_bg(uint8_t row, uint8_t col) {
+    return (framebuffer[row * VGA_WIDTH + col] >> 12) & 0x0f;
+}
+
+void framebuffer_scroll_down() {
+    for (size_t i = 0; i < VGA_HEIGHT; i++) {
+        for (size_t j = 0; j < VGA_WIDTH; j++) {
+            if (i == VGA_HEIGHT - 1) {
                 framebuffer_write(i, j, '\0', DEFAULT_FG, DEFAULT_BG);
-            }
-            else
-            {
-                framebuffer_write(i, j, framebuffer_getchar(i + 1, j), DEFAULT_FG, DEFAULT_BG);
+            } else {
+                framebuffer_write(i, j, framebuffer_getchar(i + 1, j), framebuffer_get_fg(i + 1, j), framebuffer_get_bg(i + 1, j));
             }
         }
     }

@@ -6,6 +6,7 @@
 #include "lib-header/syscall.h"
 #include "lib-header/commands/ls.h"
 #include "lib-header/commands/cd.h"
+#include "lib-header/commands/mkdir.h"
 
 void pwd(struct CurrentWorkingDirectory cwd)
 {
@@ -73,6 +74,8 @@ int main(void)
             if (strcmp(command[0], "cd"))
             {
                 cd(&cwd, command[1]);
+            } else if (strcmp(command[0], "mkdir")) {
+                if (command_args >= 2) mkdir(cwd, command[1]);
             }
         }
         puts("\n", VGA_COLOR_BLACK);
