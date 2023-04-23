@@ -73,6 +73,19 @@ int strcmp(char *str1, char *str2)
     return TRUE;
 }
 
+void strcpy(char *dst, char *src) {
+    // Empty Old String
+    for (size_t i = 0; i < strlen(dst); i++) {
+        dst[i] = '\0';
+    }
+
+    // Copy String in Src to Dst
+    while (*src != '\0') {
+        *dst++ = *src++;
+    }
+    *dst = '\0';
+}
+
 char *strncpy(char *dest, const char *src, size_t n)
 {
     char *ret = dest;
