@@ -7,6 +7,7 @@
 #include "lib-header/commands/ls.h"
 #include "lib-header/commands/cd.h"
 #include "lib-header/commands/mkdir.h"
+#include "lib-header/commands/cat.h"
 
 void pwd(struct CurrentWorkingDirectory cwd)
 {
@@ -77,6 +78,10 @@ int main(void)
             } else if (strcmp(command[0], "mkdir")) {
                 if (command_args >= 2) mkdir(cwd, command[1]);
             }
+            if (strcmp(command[0], "cat")){
+                cat(cwd, command[1]);
+            }
+            
         }
         puts("\n", VGA_COLOR_BLACK);
     }
