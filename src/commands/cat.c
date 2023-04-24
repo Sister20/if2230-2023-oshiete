@@ -22,7 +22,7 @@ void cat(struct CurrentWorkingDirectory cwd, char *file_path)
     // CHECK IF NAME AND EXT OUTSIDE CONSTRAINTS
     if (strlen(name) > 8 || strlen(ext) > 3) {
         retcode = 3;
-        puts("Error: File name and extension out of constraints", VGA_COLOR_RED);
+        puts("Error: File name or extension out of constraints", VGA_COLOR_RED);
         return;
     }
 
