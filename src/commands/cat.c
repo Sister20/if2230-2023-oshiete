@@ -7,21 +7,11 @@ void cat(struct CurrentWorkingDirectory cwd, char *file_path)
     int8_t retcode = read_path(file_path, &cwd, file_name);
 
     // SEPERATE FILE NAME INTO NAME AND EXT
-    const char* delim = ".";
-    char* name;
-    char* ext;
-
-    name = strtok(file_name, delim);
-    ext = strtok(NULL, delim);
-
-    // IF NO EXTENSION, REPLACE EXTENSION WITH \0
-    if (ext == NULL){
-        memcpy(ext, "\0\0\0", 3);
-    }
-
-    // CHECK IF NAME AND EXT OUTSIDE CONSTRAINTS
-    if (strlen(name) > 8 || strlen(ext) > 3) {
-        retcode = 3;
+    char name[8] = "\0";
+    char ext[3] = "\0";
+    retcode = separate_filename(file_name, name, ext);
+    
+    if (retcode == 3){
         puts("Error: File name or extension out of constraints", VGA_COLOR_RED);
         return;
     }
@@ -37,9 +27,8 @@ void cat(struct CurrentWorkingDirectory cwd, char *file_path)
         .buffer_size = sizeof(cbuf),
     };
 
-    // COPY NAME AND EXT TO req
-    memcpy(req.name, name, strlen(name));
-    memcpy(req.ext, ext, strlen(ext));
+    memcpy(req.name, name, 8);
+    memcpy(req.ext, ext,3);
 
     // SYSCALL TO READ FILEs
     syscall(0, (uint32_t)&req, (uint32_t)&retcode, (uint32_t)&found_cluster_number);
