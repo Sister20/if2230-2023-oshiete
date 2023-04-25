@@ -59,7 +59,7 @@ void syscall(struct CPURegister cpu, __attribute__((unused)) struct InterruptSta
     if (cpu.eax == 0)
     {
         struct FAT32DriverRequest request = *(struct FAT32DriverRequest *)cpu.ebx;
-        *((int8_t *)cpu.ecx) = read(request);
+        *((int8_t *)cpu.ecx) = read(request, (uint32_t *)cpu.edx);
     }
     else if (cpu.eax == 1)
     {

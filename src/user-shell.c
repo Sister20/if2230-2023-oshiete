@@ -8,6 +8,7 @@
 #include "lib-header/commands/cd.h"
 #include "lib-header/commands/mkdir.h"
 #include "lib-header/commands/cat.h"
+#include "lib-header/commands/mv.h"
 
 void pwd(struct CurrentWorkingDirectory cwd)
 {
@@ -80,6 +81,9 @@ int main(void)
             }
             if (strcmp(command[0], "cat")){
                 cat(cwd, command[1]);
+            }
+            if (strcmp(command[0], "mv") && command_args >= 3){
+                mv(cwd, command[1], command[2]);
             }
             
         }

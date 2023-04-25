@@ -213,7 +213,7 @@ int8_t read_directory(struct FAT32DriverRequest request, uint32_t *found_cluster
  * @param request All attribute will be used for read, buffer_size will limit reading count
  * @return Error code: 0 success - 1 not a file - 2 not enough buffer - 3 not found - -1 unknown
  */
-int8_t read(struct FAT32DriverRequest request);
+int8_t read(struct FAT32DriverRequest request, uint32_t *found_cluster_number);
 
 /**
  * FAT32 write, write a file or folder to file system.
