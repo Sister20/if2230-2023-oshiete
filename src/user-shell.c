@@ -4,10 +4,11 @@
 #include "lib-header/string.h"
 #include "lib-header/stdmem.h"
 #include "lib-header/syscall.h"
-#include "lib-header/commands/ls.h"
-#include "lib-header/commands/cd.h"
-#include "lib-header/commands/mkdir.h"
 #include "lib-header/commands/cat.h"
+#include "lib-header/commands/cd.h"
+#include "lib-header/commands/ls.h"
+#include "lib-header/commands/mkdir.h"
+#include "lib-header/commands/whereis.h"
 
 void pwd(struct CurrentWorkingDirectory cwd)
 {
@@ -68,18 +69,16 @@ int main(void)
         int command_args = strparse(buf, command, " ");
         if (command_args > 0)
         {
-            if (strcmp(command[0], "ls"))
-            {
+            if (strcmp(command[0], "ls")) {
                 ls(cwd, &request, command[1]);
-            }
-            if (strcmp(command[0], "cd"))
-            {
+            } else if (strcmp(command[0], "cd")) {
                 cd(&cwd, command[1]);
             } else if (strcmp(command[0], "mkdir")) {
                 if (command_args >= 2) mkdir(cwd, command[1]);
-            }
-            if (strcmp(command[0], "cat")){
+            } else if (strcmp(command[0], "cat")) {
                 cat(cwd, command[1]);
+            } else if (strcmp(command[0], "whereis")) {
+                if (command_args >= 2) whereis(command[1]);
             }
             
         }
