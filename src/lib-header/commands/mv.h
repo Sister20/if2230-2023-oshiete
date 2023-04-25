@@ -1,5 +1,5 @@
-#ifndef _LS_H
-#define _LS_H
+#ifndef _MV_H
+#define _MV_H
 
 #include "../stdtype.h"
 #include "../syscall.h"
@@ -8,6 +8,6 @@
 #include "../string.h"
 #include "../stdmem.h"
 
-void mv(struct CurrentWorkingDirectory cwd, struct FAT32DriverRequest *request, int32_t *retcode, char *src, char *dest);
+void mv(struct CurrentWorkingDirectory cwd, char* src, char* dest);
 
 #endif

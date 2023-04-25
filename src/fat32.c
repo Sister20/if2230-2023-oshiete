@@ -366,7 +366,7 @@ int8_t write(struct FAT32DriverRequest request)
     return -1;
 }
 
-int8_t read(struct FAT32DriverRequest request)
+int8_t read(struct FAT32DriverRequest request, uint32_t *found_cluster_number)
 {
 
     // read parent cluster
@@ -417,6 +417,8 @@ int8_t read(struct FAT32DriverRequest request)
                     write_clusters((void *)&driver_state.dir_table_buf, request.parent_cluster_number, 1);
 
                     dir_cluster_number = (driver_state.dir_table_buf.table[i].cluster_high << 16) | driver_state.dir_table_buf.table[i].cluster_low;
+
+                    *found_cluster_number = dir_cluster_number;
 
                     do
                     {
