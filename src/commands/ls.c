@@ -1,10 +1,17 @@
 #include "../lib-header/commands/ls.h"
 
-void ls(struct CurrentWorkingDirectory cwd, struct FAT32DriverRequest *request, char *dir_name)
+void ls(struct CurrentWorkingDirectory cwd, char *dir_name)
 {
     static struct FAT32DirectoryTable dir_table[8] = {0};
-    request->buf = dir_table;
-    request->buffer_size = 8 * CLUSTER_SIZE;
+    struct FAT32DriverRequest request =
+        {
+            .buf = dir_table,
+            .name = "\0\0\0\0\0\0\0\0",
+            .ext = "\0\0\0",
+            .parent_cluster_number = cwd.clusters_stack[cwd.top],
+            .buffer_size = 8 * CLUSTER_SIZE
+        };
+
     int32_t retcode = 0;
     uint32_t found_cluster_number = 0;
     if (dir_name[0] != '\0')
@@ -13,24 +20,24 @@ void ls(struct CurrentWorkingDirectory cwd, struct FAT32DriverRequest *request, 
         retcode = read_path(dir_name, &cwd, parsed_dir_name);
         if (retcode == 0)
         {
-            memcpy(request->name, parsed_dir_name, 8);
-            request->parent_cluster_number = cwd.clusters_stack[cwd.top];
-            syscall(1, (uint32_t)request, (uint32_t)&retcode, (uint32_t)&found_cluster_number);
+            memcpy(request.name, parsed_dir_name, 8);
+            request.parent_cluster_number = cwd.clusters_stack[cwd.top];
+            syscall(1, (uint32_t)&request, (uint32_t)&retcode, (uint32_t)&found_cluster_number);
         }
     }
     else if (strcmp(cwd.dir_names[cwd.top], "root"))
     {
-        syscall(6, (uint32_t)request, (uint32_t)&retcode, 0);
+        syscall(6, (uint32_t)&request, (uint32_t)&retcode, 0);
     }
     else
     {
-        memcpy(request->name, cwd.dir_names[cwd.top], 8);
-        request->parent_cluster_number = cwd.clusters_stack[cwd.top - 1];
-        syscall(1, (uint32_t)request, (uint32_t)&retcode, (uint32_t)&found_cluster_number);
+        memcpy(request.name, cwd.dir_names[cwd.top], 8);
+        request.parent_cluster_number = cwd.clusters_stack[cwd.top - 1];
+        syscall(1, (uint32_t)&request, (uint32_t)&retcode, (uint32_t)&found_cluster_number);
     }
     if (retcode == 0)
     {
-        struct FAT32DirectoryTable *dir_table = request->buf;
+        struct FAT32DirectoryTable *dir_table = request.buf;
         for (int i = 1; i < 64; i++)
         {
             if (dir_table->table[i].name[0] != '\0' && dir_table->table[i].undelete)
@@ -67,13 +74,13 @@ void ls(struct CurrentWorkingDirectory cwd, struct FAT32DriverRequest *request, 
     case 0:
         break;
     case 1:
-        puts("Error: Not a directory", VGA_COLOR_RED);
+        puts("ls: No such file or directory", VGA_COLOR_RED);
         break;
     case 3:
-        puts("Error: Directory not found", VGA_COLOR_RED);
+        puts("ls: No such file or directory", VGA_COLOR_RED);
         break;
     default:
-        puts("Error: Unknown", VGA_COLOR_RED);
+        puts("ls: Unknown error occured", VGA_COLOR_RED);
         break;
     }
 }
