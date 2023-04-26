@@ -38,7 +38,7 @@ void ls(struct CurrentWorkingDirectory cwd, char *dir_name)
     if (retcode == 0)
     {
         struct FAT32DirectoryTable *dir_table = request.buf;
-        for (int i = 1; i < 64; i++)
+        for (int i = 1; i < 64 * 8; i++)
         {
             if (dir_table->table[i].name[0] != '\0' && dir_table->table[i].undelete)
             {
