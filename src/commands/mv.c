@@ -107,20 +107,6 @@ void mv(struct CurrentWorkingDirectory cwd, char* src, char* dest)
             dest_type = 1;
         }
     }
-
-    // if (src_type == 0){
-    //     puts("src is folder", VGA_COLOR_LIGHT_BLUE);    
-    // } else if (src_type == 1){
-    //     puts("src is file", VGA_COLOR_LIGHT_GREEN);
-    // } 
-
-    // if (dest_type == 0){
-    //     puts("dest is folder", VGA_COLOR_LIGHT_BLUE);    
-    // } else if (dest_type == 1){
-    //     puts("dest is file", VGA_COLOR_LIGHT_GREEN);
-    // } else {
-    //     puts("Error: Destination file not valid", VGA_COLOR_RED);
-    // }
     
     // mv dir1:exist dir2:exist, move dir 1 to dir 2
     if (src_type == 0 && dest_type == 0){
@@ -128,14 +114,13 @@ void mv(struct CurrentWorkingDirectory cwd, char* src, char* dest)
 
         uint32_t new_cluster_number = dest_cluster_number;
 
-        syscall(8, (uint32_t)&src_req, (uint32_t)&src_retcode,new_cluster_number);
+        syscall(8, (uint32_t)&src_req, (uint32_t)&src_retcode, new_cluster_number);
 
         if (src_retcode == 0){
             puts("success", VGA_COLOR_GREEN);
         } else {
             puts("failed", VGA_COLOR_RED);
         }
-
     } 
     // mv dir1:exist dir2:not-exist, rename dir 1 to dir 2
     else if (src_type == 0){
@@ -151,8 +136,6 @@ void mv(struct CurrentWorkingDirectory cwd, char* src, char* dest)
         } else {
             puts("failed", VGA_COLOR_RED);
         }
-
-
     } 
     // mv file:exist dir:exist, move file to dir
     else if (src_type == 1 && dest_type == 0){
@@ -177,8 +160,6 @@ void mv(struct CurrentWorkingDirectory cwd, char* src, char* dest)
         } else {
             puts("delete failed", VGA_COLOR_RED);
         }
-        
-        return;
     } 
     // mv file1:exist file2:exist, 
     else if (src_type == 1 && dest_type == 1){
