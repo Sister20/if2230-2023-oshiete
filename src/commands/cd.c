@@ -34,13 +34,13 @@ void cd(struct CurrentWorkingDirectory *cwd, char *dir_path)
     case 0:
         break;
     case 1:
-        puts("Error: Not a directory", VGA_COLOR_RED);
+        puts("cd: No such file or directory", VGA_COLOR_RED);
         break;
     case 3:
-        puts("Error: Directory not found", VGA_COLOR_RED);
+        puts("cd: No such file or directory", VGA_COLOR_RED);
         break;
     default:
-        puts("Error: Unknown", VGA_COLOR_RED);
+        puts("cd: Unknown error occured", VGA_COLOR_RED);
         break;
     }
 }

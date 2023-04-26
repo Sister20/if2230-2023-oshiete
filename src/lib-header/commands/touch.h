@@ -1,5 +1,5 @@
-#ifndef _LS_H
-#define _LS_H
+#ifndef _TOUCH_H
+#define _TOUCH_H
 
 #include "../stdtype.h"
 #include "../syscall.h"
@@ -8,6 +8,6 @@
 #include "../string.h"
 #include "../stdmem.h"
 
-void ls(struct CurrentWorkingDirectory cwd, char *dir_name);
+void touch(struct CurrentWorkingDirectory cwd, char command[12][128]);
 
 #endif

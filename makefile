@@ -78,11 +78,12 @@ user-shell:
 	@$(CC)  $(CFLAGS) -fno-pie $(SOURCE_FOLDER)/commands/mkdir.c -o mkdir.o
 	@$(CC)  $(CFLAGS) -fno-pie $(SOURCE_FOLDER)/commands/mv.c -o mv.o
 	@$(CC)  $(CFLAGS) -fno-pie $(SOURCE_FOLDER)/commands/whereis.c -o whereis.o
+	@$(CC)  $(CFLAGS) -fno-pie $(SOURCE_FOLDER)/commands/touch.c -o touch.o
 	@$(LIN) -T $(SOURCE_FOLDER)/user-linker.ld -melf_i386 \
-		user-entry.o user-shell.o string.o stdmem.o ls.o syscall.o cd.o mkdir.o cat.o mv.o whereis.o -o $(OUTPUT_FOLDER)/shell
+		user-entry.o user-shell.o string.o stdmem.o ls.o syscall.o cd.o mkdir.o cat.o mv.o whereis.o touch.o -o $(OUTPUT_FOLDER)/shell
 	@echo Linking object shell object files and generate flat binary...
 	@$(LIN) -T $(SOURCE_FOLDER)/user-linker.ld -melf_i386 --oformat=elf32-i386\
-		user-entry.o user-shell.o string.o stdmem.o ls.o syscall.o cd.o mkdir.o cat.o mv.o whereis.o -o $(OUTPUT_FOLDER)/shell_elf
+		user-entry.o user-shell.o string.o stdmem.o ls.o syscall.o cd.o mkdir.o cat.o mv.o whereis.o touch.o -o $(OUTPUT_FOLDER)/shell_elf
 	@echo Linking object shell object files and generate ELF32 for debugging...
 	@size --target=binary bin/shell
 	@rm -f *.o
