@@ -73,14 +73,17 @@ int strcmp(char *str1, char *str2)
     return TRUE;
 }
 
-void strcpy(char *dst, char *src) {
+void strcpy(char *dst, char *src)
+{
     // Empty Old String
-    for (size_t i = 0; i < strlen(dst); i++) {
+    for (size_t i = 0; i < strlen(dst); i++)
+    {
         dst[i] = '\0';
     }
 
     // Copy String in Src to Dst
-    while (*src != '\0') {
+    while (*src != '\0')
+    {
         *dst++ = *src++;
     }
     *dst = '\0';
@@ -121,7 +124,7 @@ int strparse(char *str, char command[12][128], char *delim)
         strncpy(command[i], token, strlen(token));
         // Increment the count and move to the next token
         i++;
-        token = strtok(NULL, " ");
+        token = strtok(NULL, delim);
     }
 
     return i;

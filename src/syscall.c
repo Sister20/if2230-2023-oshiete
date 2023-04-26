@@ -100,23 +100,26 @@ int8_t read_path(char *relative_path, struct CurrentWorkingDirectory *cwd, char 
     return 3; // path not found
 }
 
-int8_t separate_filename(char* file_name, char* name, char* ext){
-   
+int8_t separate_filename(char *file_name, char *name, char *ext)
+{
+
     // SEPERATE FILE NAME INTO NAME AND EXT
-    const char* delim = ".";
-    char* new_name;
-    char* new_ext;
+    const char *delim = ".";
+    char *new_name;
+    char *new_ext;
 
     new_name = strtok(file_name, delim);
     new_ext = strtok(NULL, delim);
 
     // IF NO EXTENSION, REPLACE EXTENSION WITH \0
-    if (new_ext == NULL){
+    if (new_ext == NULL)
+    {
         memcpy(new_ext, "\0\0\0", 3);
     }
 
     // CHECK IF NAME AND EXT OUTSIDE CONSTRAINTS
-    if (strlen(new_name) > 8 || strlen(new_ext) > 3) {
+    if (strlen(new_name) > 8 || strlen(new_ext) > 3)
+    {
         return 3; // OUT OF CONSTRAINTS
     }
 
