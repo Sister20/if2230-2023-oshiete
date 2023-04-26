@@ -86,25 +86,33 @@ void mv(struct CurrentWorkingDirectory cwd, char* src, char* dest)
         return;
     }
 
-    // CHECK IF DEST IS DIRECTORY
-    memcpy(dest_req.name, dest_name, 8);
-    memcpy(dest_req.ext, dest_ext,3);
-
-    syscall(1, (uint32_t)&dest_req, (uint32_t)&dest_retcode, (uint32_t)&dest_cluster_number);
-
     // dest_type 0 : dir, 1 : file
     int8_t dest_type = -1;
-    if (dest_retcode == 0){
+
+    // IF dest IS .
+    if (strcmp(dest, ".")){
         dest_type = 0;
-    } else {
-        // CHECK IF DEST IS FILE
-        dest_req.buf = dest_cbuf;
-        dest_req.buffer_size = sizeof(dest_cbuf);
+        dest_cluster_number = cwd.clusters_stack[cwd.top];
+    }
+    else {
+        // CHECK IF DEST IS DIRECTORY
+        memcpy(dest_req.name, dest_name, 8);
+        memcpy(dest_req.ext, dest_ext,3);
 
-        syscall(0, (uint32_t)&dest_req, (uint32_t)&dest_retcode, (uint32_t)&dest_cluster_number);
-
+        syscall(1, (uint32_t)&dest_req, (uint32_t)&dest_retcode, (uint32_t)&dest_cluster_number);
+        
         if (dest_retcode == 0){
-            dest_type = 1;
+            dest_type = 0;
+        } else {
+            // CHECK IF DEST IS FILE
+            dest_req.buf = dest_cbuf;
+            dest_req.buffer_size = sizeof(dest_cbuf);
+
+            syscall(0, (uint32_t)&dest_req, (uint32_t)&dest_retcode, (uint32_t)&dest_cluster_number);
+
+            if (dest_retcode == 0){
+                dest_type = 1;
+            }
         }
     }
     
