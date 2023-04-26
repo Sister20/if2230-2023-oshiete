@@ -9,9 +9,14 @@ void ls(struct CurrentWorkingDirectory cwd, struct FAT32DriverRequest *request, 
     uint32_t found_cluster_number = 0;
     if (dir_name[0] != '\0')
     { // there's a dir name argument
-        memcpy(request->name, dir_name, 8);
-        request->parent_cluster_number = cwd.clusters_stack[cwd.top];
-        syscall(1, (uint32_t)request, (uint32_t)&retcode, (uint32_t)&found_cluster_number);
+        char parsed_dir_name[8] = {'\0'};
+        retcode = read_path(dir_name, &cwd, parsed_dir_name);
+        if (retcode == 0)
+        {
+            memcpy(request->name, parsed_dir_name, 8);
+            request->parent_cluster_number = cwd.clusters_stack[cwd.top];
+            syscall(1, (uint32_t)request, (uint32_t)&retcode, (uint32_t)&found_cluster_number);
+        }
     }
     else if (strcmp(cwd.dir_names[cwd.top], "root"))
     {
@@ -36,7 +41,9 @@ void ls(struct CurrentWorkingDirectory cwd, struct FAT32DriverRequest *request, 
                 }
                 else
                 {
-                    puts(dir_table->table[i].name, VGA_COLOR_WHITE);
+                    char name[8];
+                    memcpy(name, dir_table->table[i].name, 8);
+                    puts(name, VGA_COLOR_WHITE);
                     if (dir_table->table[i].ext[0] != '\0')
                     {
                         puts(".", VGA_COLOR_WHITE);
@@ -53,5 +60,20 @@ void ls(struct CurrentWorkingDirectory cwd, struct FAT32DriverRequest *request, 
                 }
             }
         }
+    }
+
+    switch (retcode)
+    {
+    case 0:
+        break;
+    case 1:
+        puts("Error: Not a directory", VGA_COLOR_RED);
+        break;
+    case 3:
+        puts("Error: Directory not found", VGA_COLOR_RED);
+        break;
+    default:
+        puts("Error: Unknown", VGA_COLOR_RED);
+        break;
     }
 }

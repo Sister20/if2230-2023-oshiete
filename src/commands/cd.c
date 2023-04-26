@@ -29,4 +29,18 @@ void cd(struct CurrentWorkingDirectory *cwd, char *dir_path)
             memcpy(cwd->dir_names[cwd->top], new_dir, 8);
         }
     }
+    switch (retcode)
+    {
+    case 0:
+        break;
+    case 1:
+        puts("Error: Not a directory", VGA_COLOR_RED);
+        break;
+    case 3:
+        puts("Error: Directory not found", VGA_COLOR_RED);
+        break;
+    default:
+        puts("Error: Unknown", VGA_COLOR_RED);
+        break;
+    }
 }

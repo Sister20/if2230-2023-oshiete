@@ -577,16 +577,18 @@ int8_t read_root_directory(struct FAT32DriverRequest request)
 }
 
 // int8_t update_dir_table(struct FAT32DirectoryTable table){
-    
+
 // }
 
-int8_t rename_dir(struct FAT32DriverRequest request, char* new_name){
+int8_t rename_dir(struct FAT32DriverRequest request, char *new_name)
+{
 
     // GET DIR CLUSTER NUMBER
     uint32_t cluster_number;
     int8_t retcode = read_directory(request, &cluster_number);
 
-    if (retcode != 0){
+    if (retcode != 0)
+    {
         return retcode;
     }
 
@@ -609,7 +611,7 @@ int8_t rename_dir(struct FAT32DriverRequest request, char* new_name){
     cmos_read_rtc(&t);
     new_entry.create_time = t.hour << 8 | t.minute;
     new_entry.create_date = t.year << 9 | t.month << 5 | t.day;
-    
+
     // retcode = delete(request);
 
     // if (retcode != 0){
@@ -621,8 +623,10 @@ int8_t rename_dir(struct FAT32DriverRequest request, char* new_name){
     // READ PARENT CLUSTER
     read_clusters(&dir_table, parent_cluster, 1);
 
-    for (int8_t i = 1; i < 64; i++){
-        if (memcmp(dir_table.table[i].name, request.name, 8) == 0){
+    for (int8_t i = 1; i < 64; i++)
+    {
+        if (memcmp(dir_table.table[i].name, request.name, 8) == 0)
+        {
             dir_table.table[i] = new_entry;
             break;
         }
@@ -642,13 +646,15 @@ int8_t rename_dir(struct FAT32DriverRequest request, char* new_name){
     return 0;
 }
 
-int8_t move_dir(struct FAT32DriverRequest request, uint32_t new_cluster_number){
+int8_t move_dir(struct FAT32DriverRequest request, uint32_t new_cluster_number)
+{
 
     // GET DIR CLUSTER NUMBER
     uint32_t cluster_number;
     int8_t retcode = read_directory(request, &cluster_number);
 
-    if (retcode != 0){
+    if (retcode != 0)
+    {
         return retcode;
     }
 
@@ -671,18 +677,21 @@ int8_t move_dir(struct FAT32DriverRequest request, uint32_t new_cluster_number){
     cmos_read_rtc(&t);
     new_entry.create_time = t.hour << 8 | t.minute;
     new_entry.create_date = t.year << 9 | t.month << 5 | t.day;
-    
-    retcode = delete(request);
 
-    if (retcode != 0){
+    retcode = delete (request);
+
+    if (retcode != 0)
+    {
         return retcode;
     }
 
     // READ PARENT CLUSTER
     read_clusters(&dir_table, new_cluster_number, 1);
 
-    for (int8_t i = 1; i < 64; i++){
-        if (dir_table.table[i].undelete == 0){
+    for (int8_t i = 1; i < 64; i++)
+    {
+        if (dir_table.table[i].undelete == 0)
+        {
             dir_table.table[i] = new_entry;
             break;
         }
