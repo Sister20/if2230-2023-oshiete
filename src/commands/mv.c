@@ -118,21 +118,19 @@ void mv(struct CurrentWorkingDirectory cwd, char* src, char* dest)
     
     // mv dir1:exist dir2:exist, move dir 1 to dir 2
     if (src_type == 0 && dest_type == 0){
-        puts("1", VGA_COLOR_BLUE);
 
         uint32_t new_cluster_number = dest_cluster_number;
 
         syscall(8, (uint32_t)&src_req, (uint32_t)&src_retcode, new_cluster_number);
 
         if (src_retcode == 0){
-            puts("success", VGA_COLOR_GREEN);
+            puts("Success : Directory moved", VGA_COLOR_GREEN);
         } else {
-            puts("failed", VGA_COLOR_RED);
+            puts("Error : Failed to move directory", VGA_COLOR_RED);
         }
     } 
     // mv dir1:exist dir2:not-exist, rename dir 1 to dir 2
     else if (src_type == 0){
-        puts("2", VGA_COLOR_BLUE);
 
         char* new_name = "\0";
         memcpy(new_name, dest_req.name, 8);
@@ -140,9 +138,9 @@ void mv(struct CurrentWorkingDirectory cwd, char* src, char* dest)
         syscall(7, (uint32_t)&src_req, (uint32_t)&src_retcode, (uint32_t) new_name);
 
         if (src_retcode == 0){
-            puts("success", VGA_COLOR_GREEN);
+            puts("Success : Directory renamed", VGA_COLOR_GREEN);
         } else {
-            puts("failed", VGA_COLOR_RED);
+            puts("Error : Failed to rename directory", VGA_COLOR_RED);
         }
     } 
     // mv file:exist dir:exist, move file to dir
@@ -155,23 +153,21 @@ void mv(struct CurrentWorkingDirectory cwd, char* src, char* dest)
         syscall(2, (uint32_t)&src_req, (uint32_t)&src_retcode, (uint32_t)&src_cluster_number);
 
         if (src_retcode == 0){
-            puts("success", VGA_COLOR_GREEN);
-        } else {
-            puts("failed", VGA_COLOR_RED);
-        }
+            // delete file from prev dir
+            syscall(3, (uint32_t)&prev_req, (uint32_t)&src_retcode, (uint32_t)&src_cluster_number);
 
-        // delete file from prev dir
-        syscall(3, (uint32_t)&prev_req, (uint32_t)&src_retcode, (uint32_t)&src_cluster_number);
+            if (src_retcode == 0){
+                puts("Success : File moved", VGA_COLOR_GREEN);
+            } else {
+                puts("Error : Failed to move file", VGA_COLOR_RED);
+            }
 
-        if (src_retcode == 0){
-            puts("delete success", VGA_COLOR_GREEN);
         } else {
-            puts("delete failed", VGA_COLOR_RED);
-        }
+            puts("Error : Failed to move file", VGA_COLOR_RED);
+        }       
     } 
     // mv file1:exist file2:exist, 
     else if (src_type == 1 && dest_type == 1){
-        puts("4", VGA_COLOR_BLUE);
 
         // SAVE PREVIOUS DEST REQUEST
         struct FAT32DriverRequest prev_dest_req = dest_req;
@@ -184,20 +180,20 @@ void mv(struct CurrentWorkingDirectory cwd, char* src, char* dest)
         syscall(3, (uint32_t)&prev_dest_req, (uint32_t)&dest_retcode, (uint32_t)&dest_cluster_number);
 
         if (src_retcode == 0 && dest_retcode == 0){
-            puts("delete success", VGA_COLOR_GREEN);
-        } else {
-            puts("delete failed", VGA_COLOR_RED);
-        }
 
-        // WRITE FILE
-        syscall(2, (uint32_t)&dest_req, (uint32_t)&dest_retcode, (uint32_t)&dest_cluster_number);
+            // WRITE FILE
+            syscall(2, (uint32_t)&dest_req, (uint32_t)&dest_retcode, (uint32_t)&dest_cluster_number);
 
-        // CHECK IF WRITE SUCCESS
-        if (dest_retcode == 0){
-            puts("rename success", VGA_COLOR_GREEN);
+            // CHECK IF WRITE SUCCESS
+            if (dest_retcode == 0){
+                puts("Success : File content replaced", VGA_COLOR_GREEN);
+            } else {
+                puts("Error : Failed to replace file content", VGA_COLOR_RED);
+            }
+
         } else {
-            puts("rename failed", VGA_COLOR_RED);
-        }
+            puts("Error : Failed to replace file content", VGA_COLOR_RED);
+        }  
     } 
     // mv file1:exist file2:not-exist
     else if (src_type == 1){
@@ -212,18 +208,17 @@ void mv(struct CurrentWorkingDirectory cwd, char* src, char* dest)
 
         // CHECK IF WRITE SUCCESS
         if (src_retcode == 0){
-            puts("rename success", VGA_COLOR_GREEN);
-        } else {
-            puts("rename failed", VGA_COLOR_RED);
-        }
 
-        // DELETE FILE FROM PREV DIR
-        syscall(3, (uint32_t)&src_req, (uint32_t)&src_retcode, (uint32_t)&src_cluster_number);
+            // DELETE FILE FROM PREV DIR
+            syscall(3, (uint32_t)&src_req, (uint32_t)&src_retcode, (uint32_t)&src_cluster_number);
 
-        if (src_retcode == 0){
-            puts("delete success", VGA_COLOR_GREEN);
+            if (src_retcode == 0){
+                puts("Success : File renamed", VGA_COLOR_GREEN);
+            } else {
+                puts("Error : Failed to rename file", VGA_COLOR_RED);
+            }
         } else {
-            puts("delete failed", VGA_COLOR_RED);
+            puts("Error : Failed to rename file", VGA_COLOR_RED);
         }
     } 
 
