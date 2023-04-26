@@ -12,7 +12,8 @@
 #include "lib-header/keyboard.h"
 #include "lib-header/paging.h"
 
-void kernel_setup(void) {
+void kernel_setup(void)
+{
     // enter_protected_mode(&_gdt_gdtr);
     // pic_remap();
     // initialize_idt();
@@ -24,7 +25,6 @@ void kernel_setup(void) {
 
     // allocate_single_user_page_frame((void *)0x0);
     // *((uint8_t*) 0x500000) = 1;
-
 
     // struct ClusterBuffer cbuf[5];
     // for (uint32_t i = 0; i < 5; i++)
@@ -51,7 +51,7 @@ void kernel_setup(void) {
     // write(request);  // Create fragmented file "daijoubu"
 
     // struct ClusterBuffer readcbuf;
-    // read_clusters(&readcbuf, ROOT_CLUSTER_NUMBER+1, 1); 
+    // read_clusters(&readcbuf, ROOT_CLUSTER_NUMBER+1, 1);
     // // If read properly, readcbuf should filled with 'a'
 
     // request.buffer_size = CLUSTER_SIZE;
@@ -74,15 +74,15 @@ void kernel_setup(void) {
     set_tss_register();
 
     // Allocate first 4 MiB virtual memory
-    allocate_single_user_page_frame((uint8_t*) 0);
+    allocate_single_user_page_frame((uint8_t *)0);
 
     // Write shell into memory
     struct FAT32DriverRequest request = {
-        .buf                   = (uint8_t*) 0,
-        .name                  = "shell",
-        .ext                   = "\0\0\0",
+        .buf = (uint8_t *)0,
+        .name = "shell",
+        .ext = "\0\0\0",
         .parent_cluster_number = ROOT_CLUSTER_NUMBER,
-        .buffer_size           = 0x100000,
+        .buffer_size = 0x100000,
     };
     uint32_t found_cluster_number;
     read(request, &found_cluster_number);
@@ -102,61 +102,60 @@ void kernel_setup(void) {
 
     // write(request2);  // Create file "ikanaide"
 
-    // struct FAT32DriverRequest request3 = {
-    //     .buf                   = cbuf,
-    //     .name                  = "lol",
-    //     .ext                   = "\0\0\0",
-    //     .parent_cluster_number = ROOT_CLUSTER_NUMBER,
-    //     .buffer_size           = 0,
-    // };
+    struct FAT32DriverRequest request3 = {
+        .buf = cbuf,
+        .name = "lol",
+        .ext = "\0\0\0",
+        .parent_cluster_number = ROOT_CLUSTER_NUMBER,
+        .buffer_size = 0,
+    };
 
     // write(request3);
 
-    // struct FAT32DriverRequest request4 = {
-    //     .buf                   = cbuf,
-    //     .name                  = "lolsss",
-    //     .ext                   = "txt",
-    //     .parent_cluster_number = 12,
-    //     .buffer_size           = CLUSTER_SIZE,
-    // };
+    struct FAT32DriverRequest request4 = {
+        .buf = cbuf,
+        .name = "lolsss",
+        .ext = "txt",
+        .parent_cluster_number = 10,
+        .buffer_size = CLUSTER_SIZE,
+    };
 
     // write(request4);
 
     // struct FAT32DriverRequest request5 = {
-    //     .buf                   = cbuf,
-    //     .name                  = "sleep",
-    //     .ext                   = "\0\0\0",
-    //     .parent_cluster_number = 12,
-    //     .buffer_size           = CLUSTER_SIZE,
+    //     .buf = cbuf,
+    //     .name = "sleep",
+    //     .ext = "\0\0\0",
+    //     .parent_cluster_number = 10,
+    //     .buffer_size = CLUSTER_SIZE,
     // };
 
     // write(request5);
 
     // struct FAT32DriverRequest request6 = {
-    //     .buf                   = cbuf,
-    //     .name                  = "ktl",
-    //     .ext                   = "ktl",
-    //     .parent_cluster_number = 12,
-    //     .buffer_size           = CLUSTER_SIZE,
+    //     .buf = cbuf,
+    //     .name = "ktl",
+    //     .ext = "ktl",
+    //     .parent_cluster_number = 10,
+    //     .buffer_size = CLUSTER_SIZE,
     // };
 
     // write(request6);
 
     // struct FAT32DriverRequest request7 = {
-    //     .buf                   = cbuf,
-    //     .name                  = "ktlsss",
-    //     .ext                   = "ktl",
-    //     .parent_cluster_number = 12,
-    //     .buffer_size           = CLUSTER_SIZE,
+    //     .buf = cbuf,
+    //     .name = "ktlsss",
+    //     .ext = "ktl",
+    //     .parent_cluster_number = 10,
+    //     .buffer_size = CLUSTER_SIZE,
     // };
 
     // write(request7);
 
-
-    // Set TSS $esp pointer and jump into shell 
+    // Set TSS $esp pointer and jump into shell
     set_tss_kernel_current_stack();
-    kernel_execute_user_program((uint8_t*) 0);
+    kernel_execute_user_program((uint8_t *)0);
 
-    while (TRUE);
-
+    while (TRUE)
+        ;
 }

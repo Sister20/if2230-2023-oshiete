@@ -582,7 +582,8 @@ int8_t rename_dir(struct FAT32DriverRequest request, char* new_name){
     uint32_t cluster_number;
     int8_t retcode = read_directory(request, &cluster_number);
 
-    if (retcode != 0){
+    if (retcode != 0)
+    {
         return retcode;
     }
 
@@ -645,13 +646,15 @@ int8_t rename_dir(struct FAT32DriverRequest request, char* new_name){
     return 0;
 }
 
-int8_t move_dir(struct FAT32DriverRequest request, uint32_t new_cluster_number){
+int8_t move_dir(struct FAT32DriverRequest request, uint32_t new_cluster_number)
+{
 
     // GET DIR CLUSTER NUMBER
     uint32_t cluster_number;
     int8_t retcode = read_directory(request, &cluster_number);
 
-    if (retcode != 0){
+    if (retcode != 0)
+    {
         return retcode;
     }
 
