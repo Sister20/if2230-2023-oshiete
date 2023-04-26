@@ -235,4 +235,8 @@ uint32_t findEmptyCluster();
 
 int8_t read_root_directory(struct FAT32DriverRequest request);
 
+int8_t rename_dir(struct FAT32DriverRequest request, char* new_name);
+
+int8_t move_dir(struct FAT32DriverRequest request, uint32_t new_cluster_number);
+
 #endif
