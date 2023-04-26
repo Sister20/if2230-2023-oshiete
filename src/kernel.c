@@ -102,23 +102,23 @@ void kernel_setup(void)
 
     // write(request2);  // Create file "ikanaide"
 
-    struct FAT32DriverRequest request3 = {
-        .buf = cbuf,
-        .name = "lol",
-        .ext = "\0\0\0",
-        .parent_cluster_number = ROOT_CLUSTER_NUMBER,
-        .buffer_size = 0,
-    };
+    // struct FAT32DriverRequest request3 = {
+    //     .buf = cbuf,
+    //     .name = "lol",
+    //     .ext = "\0\0\0",
+    //     .parent_cluster_number = ROOT_CLUSTER_NUMBER,
+    //     .buffer_size = 0,
+    // };
 
     // write(request3);
 
-    struct FAT32DriverRequest request4 = {
-        .buf = cbuf,
-        .name = "lolsss",
-        .ext = "txt",
-        .parent_cluster_number = 10,
-        .buffer_size = CLUSTER_SIZE,
-    };
+    // struct FAT32DriverRequest request4 = {
+    //     .buf = cbuf,
+    //     .name = "lolsss",
+    //     .ext = "txt",
+    //     .parent_cluster_number = 10,
+    //     .buffer_size = CLUSTER_SIZE,
+    // };
 
     // write(request4);
 
