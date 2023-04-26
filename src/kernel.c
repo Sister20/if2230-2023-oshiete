@@ -87,10 +87,10 @@ void kernel_setup(void)
     uint32_t found_cluster_number;
     read(request, &found_cluster_number);
 
-    struct ClusterBuffer cbuf[1];
-    for (uint32_t i = 0; i < 1; i++)
-        for (uint32_t j = 0; j < 20; j++)
-            cbuf[i].buf[j] = i + 'a';
+    // struct ClusterBuffer cbuf[1];
+    // for (uint32_t i = 0; i < 1; i++)
+    //     for (uint32_t j = 0; j < 20; j++)
+    //         cbuf[i].buf[j] = i + 'a';
 
     // struct FAT32DriverRequest request2 = {
     //     .buf                   = cbuf,
@@ -102,25 +102,25 @@ void kernel_setup(void)
 
     // write(request2);  // Create file "ikanaide"
 
-    struct FAT32DriverRequest request3 = {
-        .buf = cbuf,
-        .name = "lol",
-        .ext = "\0\0\0",
-        .parent_cluster_number = ROOT_CLUSTER_NUMBER,
-        .buffer_size = 0,
-    };
+    // struct FAT32DriverRequest request3 = {
+    //     .buf = cbuf,
+    //     .name = "lol",
+    //     .ext = "\0\0\0",
+    //     .parent_cluster_number = ROOT_CLUSTER_NUMBER,
+    //     .buffer_size = 0,
+    // };
 
-    write(request3);
+    // write(request3);
 
-    struct FAT32DriverRequest request4 = {
-        .buf = cbuf,
-        .name = "lolsss",
-        .ext = "txt",
-        .parent_cluster_number = 10,
-        .buffer_size = CLUSTER_SIZE,
-    };
+    // struct FAT32DriverRequest request4 = {
+    //     .buf = cbuf,
+    //     .name = "lolsss",
+    //     .ext = "txt",
+    //     .parent_cluster_number = 10,
+    //     .buffer_size = CLUSTER_SIZE,
+    // };
 
-    write(request4);
+    // write(request4);
 
     // struct FAT32DriverRequest request5 = {
     //     .buf = cbuf,
