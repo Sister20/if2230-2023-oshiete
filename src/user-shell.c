@@ -10,6 +10,7 @@
 #include "lib-header/commands/mkdir.h"
 #include "lib-header/commands/mv.h"
 #include "lib-header/commands/whereis.h"
+#include "lib-header/commands/touch.h"
 
 void pwd(struct CurrentWorkingDirectory cwd)
 {
@@ -80,8 +81,9 @@ int main(void)
             }
             else if (strcmp(command[0], "ls"))
             {
-                ls(cwd, &request, command[1]);
+                ls(cwd, command[1]);
             }
+
             else if (strcmp(command[0], "mkdir"))
             {
                 if (command_args >= 2)
@@ -95,6 +97,15 @@ int main(void)
             {
                 if (command_args >= 2)
                     whereis(command[1]);
+            }
+            else if (strcmp(command[0], "touch"))
+            {
+                if (command_args >= 2)
+                    touch(cwd, command);
+            }
+            else
+            {
+                puts("Unknown command!", VGA_COLOR_RED);
             }
         }
         puts("\n", VGA_COLOR_BLACK);
