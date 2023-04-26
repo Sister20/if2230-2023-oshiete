@@ -42,6 +42,11 @@ void cat(struct CurrentWorkingDirectory cwd, char *file_path)
             struct ClusterBuffer item = filled_buf[i];
             for (int j = 0; j < CLUSTER_SIZE; j++) {
                 char c = (char) item.buf[j];
+
+                if (c == 0){
+                    break;
+                }
+
                 char str[2] = {c, '\0'};
                 puts(str, VGA_COLOR_WHITE);
             }
