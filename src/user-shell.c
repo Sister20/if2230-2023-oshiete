@@ -103,6 +103,10 @@ int main(void)
                 if (command_args >= 2)
                     touch(cwd, command);
             }
+            else if (strcmp(command[0], "rm") && command_args >= 2)
+            {
+                rm(cwd, command[1]);
+            }
             else
             {
                 puts("Unknown command!", VGA_COLOR_RED);
