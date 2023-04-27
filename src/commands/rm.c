@@ -1,6 +1,6 @@
 #include "../lib-header/commands/rm.h"
 
-void rm(struct CurrentWorkingDirectory cwd, char* src, int8_t root_command)
+void rm(struct CurrentWorkingDirectory cwd, char* src)
 {
     // CONSTRUCT CWD FOR SRC 
     struct CurrentWorkingDirectory src_cwd = cwd;
@@ -62,21 +62,20 @@ void rm(struct CurrentWorkingDirectory cwd, char* src, int8_t root_command)
     if (src_type == -1) {
         puts("Error: Source file not valid", VGA_COLOR_RED);
         return;
-    } else if (src_type == 1 && root_command == 1) {
-        syscall(3, (uint32_t)&src_req, (uint32_t)&src_retcode, (uint32_t)&src_cluster_number);
-            
+    } else {
+        if (src_type == 1) {
+            syscall(3, (uint32_t)&src_req, (uint32_t)&src_retcode, (uint32_t)&src_cluster_number);
+        } else if (src_type == 0) {
+            syscall(9, (uint32_t)&src_req, (uint32_t)&src_retcode, (uint32_t)&src_cluster_number);
+        }
+
         if (src_retcode == 0) {
             puts("delete success", VGA_COLOR_GREEN);
         } else {
             puts("delete failed", VGA_COLOR_RED);
         }
-    } else if (src_type == 0) {
-        syscall(9, (uint32_t)&src_req, (uint32_t)&src_retcode, (uint32_t)&src_cluster_number);
-            
-        if (src_retcode == 0) {
-            puts("delete success", VGA_COLOR_GREEN);
-        } else {
-            puts("delete failed", VGA_COLOR_RED);
-        }
+
     }
+    return;
+    
 }
