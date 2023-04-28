@@ -9,8 +9,7 @@ void ls(struct CurrentWorkingDirectory cwd, char *dir_name)
             .name = "\0\0\0\0\0\0\0\0",
             .ext = "\0\0\0",
             .parent_cluster_number = cwd.clusters_stack[cwd.top],
-            .buffer_size = 8 * CLUSTER_SIZE
-        };
+            .buffer_size = 8 * CLUSTER_SIZE};
 
     int32_t retcode = 0;
     uint32_t found_cluster_number = 0;
@@ -42,17 +41,19 @@ void ls(struct CurrentWorkingDirectory cwd, char *dir_name)
         {
             if (dir_table->table[i].name[0] != '\0' && dir_table->table[i].undelete)
             {
+                char name[8] = "\0\0\0\0\0\0\0";
+                strcpy(name, dir_table->table[i].name);
                 if (dir_table->table[i].attribute)
                 {
-                    puts(dir_table->table[i].name, VGA_COLOR_LIGHT_RED);
+                    puts(name, VGA_COLOR_LIGHT_RED);
                 }
                 else
                 {
-                    char name[8];
-                    memcpy(name, dir_table->table[i].name, 8);
                     puts(name, VGA_COLOR_WHITE);
                     if (dir_table->table[i].ext[0] != '\0')
                     {
+                        char ext[3] = "\0";
+                        strcpy(ext, dir_table->table[i].ext);
                         puts(".", VGA_COLOR_WHITE);
                         puts(dir_table->table[i].ext, VGA_COLOR_WHITE);
                     }

@@ -124,8 +124,8 @@ int8_t separate_filename(char *file_name, char *name, char *ext)
     }
 
     // RESET BUFFER
-    memcpy(name, "\0\0\0\0\0\0\0\0", strlen(new_name));
-    memcpy(ext, "\0\0\0", strlen(new_ext));
+    memcpy(name, "\0\0\0\0\0\0\0\0", 8);
+    memcpy(ext, "\0\0\0", 3);
 
     memcpy(name, new_name, strlen(new_name));
     memcpy(ext, new_ext, strlen(new_ext));
