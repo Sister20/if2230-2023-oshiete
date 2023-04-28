@@ -1,10 +1,6 @@
 {
     "debug.onTaskErrors": "debugAnyway",
     "files.associations": {
-<<<<<<< HEAD
-        "portio.h": "c",
-        "kernel_loader.h": "c"
-=======
         "*.pl": "prolog",
         "portio.h": "c",
         "stdtype.h": "c",
@@ -12,6 +8,5 @@
         "framebuffer.h": "c",
         "stdmem.h": "c",
         "keyboard.h": "c"
->>>>>>> f7fd0763c0aeaa87c78b4958c6da04a93226471a
     },
 }
