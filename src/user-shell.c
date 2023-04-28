@@ -11,6 +11,9 @@
 #include "lib-header/commands/mv.h"
 #include "lib-header/commands/whereis.h"
 #include "lib-header/commands/touch.h"
+#include "lib-header/commands/rm.h"
+#include "lib-header/commands/cp.h"
+
 
 void pwd(struct CurrentWorkingDirectory cwd)
 {
@@ -103,6 +106,18 @@ int main(void)
             {
                 if (command_args >= 2)
                     touch(cwd, command);
+            }
+            else if (strcmp(command[0], "rm") && command_args >= 2)
+            {
+                rm(cwd, command[1]);
+            }
+            else if (strcmp(command[0], "cp") && command_args >= 3)
+            {
+                if (strcmp(command[1], "-r")) {
+                    cp(cwd, command[2], command[3], 1, 1);
+                } else {
+                    cp(cwd, command[1], command[2], 0, 1);
+                }
             }
             else
             {

@@ -19,4 +19,6 @@ char *strncpy(char *dest, const char *src, size_t n);
 
 char *strtok(char *str, const char *delim);
 
+char* strcat(char* dest, const char* src);
+
 #endif
