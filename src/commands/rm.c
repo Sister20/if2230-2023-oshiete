@@ -6,7 +6,7 @@ void rm(struct CurrentWorkingDirectory cwd, char* src)
     struct CurrentWorkingDirectory src_cwd = cwd;
 
     char src_file[12] = "\0";
-    char dest_file[12] = "\0";
+    // char dest_file[12] = "\0";
 
     int8_t src_retcode = read_path(src, &src_cwd, src_file);
 

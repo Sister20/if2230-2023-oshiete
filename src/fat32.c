@@ -763,7 +763,7 @@ int8_t delete_all(struct FAT32DriverRequest request)
 {
     const int DELETE_SUCCESS_RETURN = 0;
     const int REQUEST_NAME_NOT_FOUND_RETURN = 1;
-    const int FOLDER_IS_NOT_EMPTY_RETURN = 2;
+    // const int FOLDER_IS_NOT_EMPTY_RETURN = 2;
     const int UNKOWN_REQUEST_TYPE_RETURN = -1;
     // read parent cluster
     read_clusters((void *)&driver_state.dir_table_buf, request.parent_cluster_number, 1);
