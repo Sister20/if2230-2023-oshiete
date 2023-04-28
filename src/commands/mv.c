@@ -123,9 +123,7 @@ void mv(struct CurrentWorkingDirectory cwd, char* src, char* dest)
 
         syscall(8, (uint32_t)&src_req, (uint32_t)&src_retcode, new_cluster_number);
 
-        if (src_retcode == 0){
-            puts("Success : Directory moved", VGA_COLOR_GREEN);
-        } else {
+        if (src_retcode != 0){
             puts("Error : Failed to move directory", VGA_COLOR_RED);
         }
     } 
@@ -137,9 +135,7 @@ void mv(struct CurrentWorkingDirectory cwd, char* src, char* dest)
 
         syscall(7, (uint32_t)&src_req, (uint32_t)&src_retcode, (uint32_t) new_name);
 
-        if (src_retcode == 0){
-            puts("Success : Directory renamed", VGA_COLOR_GREEN);
-        } else {
+        if (src_retcode != 0){
             puts("Error : Failed to rename directory", VGA_COLOR_RED);
         }
     } 
@@ -156,9 +152,7 @@ void mv(struct CurrentWorkingDirectory cwd, char* src, char* dest)
             // delete file from prev dir
             syscall(3, (uint32_t)&prev_req, (uint32_t)&src_retcode, (uint32_t)&src_cluster_number);
 
-            if (src_retcode == 0){
-                puts("Success : File moved", VGA_COLOR_GREEN);
-            } else {
+            if (src_retcode != 0){
                 puts("Error : Failed to move file", VGA_COLOR_RED);
             }
 
@@ -185,9 +179,7 @@ void mv(struct CurrentWorkingDirectory cwd, char* src, char* dest)
             syscall(2, (uint32_t)&dest_req, (uint32_t)&dest_retcode, (uint32_t)&dest_cluster_number);
 
             // CHECK IF WRITE SUCCESS
-            if (dest_retcode == 0){
-                puts("Success : File content replaced", VGA_COLOR_GREEN);
-            } else {
+            if (dest_retcode != 0){
                 puts("Error : Failed to replace file content", VGA_COLOR_RED);
             }
 
@@ -212,9 +204,7 @@ void mv(struct CurrentWorkingDirectory cwd, char* src, char* dest)
             // DELETE FILE FROM PREV DIR
             syscall(3, (uint32_t)&src_req, (uint32_t)&src_retcode, (uint32_t)&src_cluster_number);
 
-            if (src_retcode == 0){
-                puts("Success : File renamed", VGA_COLOR_GREEN);
-            } else {
+            if (src_retcode != 0){
                 puts("Error : Failed to rename file", VGA_COLOR_RED);
             }
         } else {
