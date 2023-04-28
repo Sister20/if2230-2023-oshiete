@@ -33,7 +33,8 @@ void pwd(struct CurrentWorkingDirectory cwd)
             puts("/", VGA_COLOR_LIGHT_MAGENTA);
         }
     }
-    puts("$ ", VGA_COLOR_GREEN);
+    puts("$", VGA_COLOR_GREEN);
+    puts("\b", DEFAULT_BG);
 }
 
 int main(void)

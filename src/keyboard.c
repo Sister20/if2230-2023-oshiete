@@ -75,6 +75,7 @@ void keyboard_isr(void) {
 
         } else if (mapped_char == '\b') {
             uint8_t newRow, newCol;
+            
             if (col == 0) {
                 if (row == 0) {
                     newRow = 0, newCol = 0;
@@ -84,6 +85,8 @@ void keyboard_isr(void) {
                         newCol--;
                     }
                 }
+            } else if (framebuffer_getchar(row, col - 1) == '\b') {
+                newRow = row, newCol = col;
             } else {
                 newRow = row, newCol = col - 1;
             }
