@@ -133,25 +133,36 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
     }
     // if source is a file and destination file doesn't exist, proceed to copy
     else if (src_type == 1) {
+
         // CREATE NEW REQUEST STRUCT
         struct FAT32DriverRequest new_req = dest_req;
-        memcpy(new_req.name, dest_req.name, 8);
-        memcpy(new_req.ext, dest_req.ext, 3);
-        new_req.buffer_size = sizeof(src_req.buf);
-        new_req.buf = src_req.buf;
+        if (dest_type == 0) {
+            memcpy(new_req.name, src_req.name, 8);
+            memcpy(new_req.ext, src_req.ext, 3);
+            new_req.buffer_size = sizeof(src_req.buf);
+            new_req.buf = src_req.buf;
+            new_req.parent_cluster_number = dest_cluster_number;
 
-        // WRITE FILE
-        syscall(2, (uint32_t)&new_req, (uint32_t)&dest_retcode, (uint32_t)&dest_cluster_number);
+            // WRITE FILE
+            syscall(2, (uint32_t)&new_req, (uint32_t)&dest_retcode, (uint32_t)&src_cluster_number);
+        } else {
+            memcpy(new_req.name, dest_req.name, 8);
+            memcpy(new_req.ext, dest_req.ext, 3);
+            new_req.buffer_size = sizeof(src_req.buf);
+            new_req.buf = src_req.buf;
+
+            // WRITE FILE
+            syscall(2, (uint32_t)&new_req, (uint32_t)&dest_retcode, (uint32_t)&dest_cluster_number);
+        }
 
         // CHECK IF WRITE SUCCESS
         if (dest_retcode == 0 && is_root_command){
             return;
         }
-        else if (is_root_command) {
+        else if (dest_retcode != 0 && is_root_command) {
             puts("Error : Failed to copy file.", VGA_COLOR_RED);
             return;
         }
-
     }
     // FOLDER PART
     // if source is a folder, recursive is required
@@ -161,9 +172,12 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
             return;
         } else {
             
-            // if destination folder already exists, fail
+            // if destination folder already exists, 
             if (dest_type == 0) {
-                puts("Error : Failed to copy because file name already exists.", VGA_COLOR_RED);
+                strcat(full_dest_path, "/");
+                strcat(full_dest_path, src_req.name);
+                cp(cwd, full_src_path, full_dest_path, 1, 1);
+
                 return;
             } else {
                 // Copy the buffer of source driver request to destination driver request    
@@ -171,7 +185,7 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
                 dest_req.buf = src_req.buf;
 
                 syscall(2, (uint32_t)&dest_req, (uint32_t)&dest_retcode, (uint32_t)&dest_cluster_number);
-
+                
                 // loop through the directory table of src
                 struct FAT32DirectoryTable *dir_table = src_req.buf;
                 for (int i = 1 ; i < 8*64; i++){
@@ -187,12 +201,14 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
                         strcpy(new_src, full_src_path);
                         strcat(new_src, "/");
                         strcat(new_src, file_name);
+                        puts(new_src, VGA_COLOR_GREEN);
 
 
                         char new_dest[50] = "\0";
                         strcpy(new_dest, full_dest_path);
                         strcat(new_dest, "/");
                         strcat(new_dest, file_name);
+                        puts(new_dest, VGA_COLOR_BLUE);
 
                         cp(cwd, new_src, new_dest, 1, 0);
                     }
