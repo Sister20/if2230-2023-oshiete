@@ -23,7 +23,7 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
     int8_t dest_retcode = read_path(changeable_dest, &dest_cwd, dest_file);
 
     if (src_retcode == 3){
-        puts("Error: Source file not valid1", VGA_COLOR_RED);
+        puts("Error: Source file not valid.", VGA_COLOR_RED);
         return;
     }
 
@@ -33,7 +33,7 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
     src_retcode = separate_filename(src_file, src_name, src_ext);
 
     if (src_retcode == 3 && is_root_command){
-        puts("Error: Source file name or extension out of constraints", VGA_COLOR_RED);
+        puts("Error: Source file name or extension out of constraints.", VGA_COLOR_RED);
         return;
     }
 
@@ -42,7 +42,7 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
     dest_retcode = separate_filename(dest_file, dest_name, dest_ext);
 
     if (dest_retcode == 3 && is_root_command){
-        puts("Error: Destination file name or extension out of constraints", VGA_COLOR_RED);
+        puts("Error: Destination file name or extension out of constraints.", VGA_COLOR_RED);
         return;
     }
 
@@ -91,7 +91,7 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
     }
 
     if (src_type == -1){
-        puts("Error: Source file not valid2", VGA_COLOR_RED);
+        puts("Error: Source file not valid.", VGA_COLOR_RED);
         return;
     }
 
@@ -145,10 +145,11 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
 
         // CHECK IF WRITE SUCCESS
         if (dest_retcode == 0 && is_root_command){
-            puts("Success : File copied.", VGA_COLOR_GREEN);
+            return;
         }
         else if (is_root_command) {
-            puts("Error : Failed to copy file3.", VGA_COLOR_RED);
+            puts("Error : Failed to copy file.", VGA_COLOR_RED);
+            return;
         }
 
     }
@@ -157,11 +158,13 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
     else if (src_type == 0) {
         if (is_recursive != 1 && is_root_command) {
             puts("Error : -r not specified.", VGA_COLOR_RED);
+            return;
         } else {
             
             // if destination folder already exists, fail
             if (dest_type == 0) {
                 puts("Error : Failed to copy because file name already exists.", VGA_COLOR_RED);
+                return;
             } else {
                 // Copy the buffer of source driver request to destination driver request    
                 dest_req.buffer_size = 0;
@@ -184,14 +187,12 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
                         strcpy(new_src, full_src_path);
                         strcat(new_src, "/");
                         strcat(new_src, file_name);
-                        puts(new_src, VGA_COLOR_GREEN);
 
 
                         char new_dest[50] = "\0";
                         strcpy(new_dest, full_dest_path);
                         strcat(new_dest, "/");
                         strcat(new_dest, file_name);
-                        puts(new_dest, VGA_COLOR_BLUE);
 
                         cp(cwd, new_src, new_dest, 1, 0);
                     }

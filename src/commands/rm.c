@@ -65,17 +65,16 @@ void rm(struct CurrentWorkingDirectory cwd, char* src,int8_t is_recursive, int8_
     }
 
     if (src_type == -1) {
-        puts("Error: Source file not valid", VGA_COLOR_RED);
+        puts("Error: Source file not valid.", VGA_COLOR_RED);
         return;
     } else {
         // FILE PART
         if (src_type == 1) {
             syscall(3, (uint32_t)&src_req, (uint32_t)&src_retcode, (uint32_t)&src_cluster_number);
             if (src_retcode == 0 && is_root_command) {
-                puts("delete success", VGA_COLOR_GREEN);
                 return;
             } else if (src_retcode != 0) {
-                puts("delete failed1", VGA_COLOR_RED);
+                puts("Error: Delete failed.", VGA_COLOR_RED);
                 return;
             }
         } 
@@ -87,10 +86,9 @@ void rm(struct CurrentWorkingDirectory cwd, char* src,int8_t is_recursive, int8_
             if (dir_table->table[0].user_attribute != UATTR_NOT_EMPTY) {
                 syscall(3, (uint32_t)&src_req, (uint32_t)&src_retcode, (uint32_t)&src_cluster_number);
                 if (src_retcode == 0 && is_root_command) {
-                    puts("delete success", VGA_COLOR_GREEN);
                     return;
                 } else if (src_retcode != 0 ) {
-                    puts("delete failed2", VGA_COLOR_RED);
+                    puts("Error: Delete failed.", VGA_COLOR_RED);
                     return;
                 }
             } 
@@ -109,17 +107,15 @@ void rm(struct CurrentWorkingDirectory cwd, char* src,int8_t is_recursive, int8_
                             strcpy(new_src, full_src_path);
                             strcat(new_src, "/");
                             strcat(new_src, file_name);
-                            puts(new_src, VGA_COLOR_GREEN);
 
                             rm(cwd, new_src, 1, 0);
                         }
                     }
                     syscall(3, (uint32_t)&src_req, (uint32_t)&src_retcode, (uint32_t)&src_cluster_number);
                     if (src_retcode == 0 && is_root_command) {
-                        puts("delete success", VGA_COLOR_GREEN);
                         return;
                     } else if (src_retcode != 0 ) {
-                        puts("delete failed3", VGA_COLOR_RED);
+                        puts("Error: Delete failed.", VGA_COLOR_RED);
                         return;
                     }
                 } else {
