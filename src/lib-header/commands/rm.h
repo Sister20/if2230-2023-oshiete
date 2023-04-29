@@ -8,6 +8,6 @@
 #include "../string.h"
 #include "../stdmem.h"
 
-void rm(struct CurrentWorkingDirectory cwd, char* src);
+void rm(struct CurrentWorkingDirectory cwd, char* src, int8_t is_recursive, int8_t is_root_command);
 
 #endif

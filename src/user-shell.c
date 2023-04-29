@@ -108,7 +108,11 @@ int main(void)
             }
             else if (strcmp(command[0], "rm") && command_args >= 2)
             {
-                rm(cwd, command[1]);
+                if (strcmp(command[1], "-r")) {
+                    rm(cwd, command[2], 1, 1);
+                } else {
+                    rm(cwd, command[1], 0, 1);
+                }
             }
             else if (strcmp(command[0], "cp") && command_args >= 3)
             {
