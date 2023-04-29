@@ -9,8 +9,18 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
     char src_file[12] = "\0";
     char dest_file[12] = "\0";
 
-    int8_t src_retcode = read_path(src, &src_cwd, src_file);
-    int8_t dest_retcode = read_path(dest, &dest_cwd, dest_file);
+    char full_src_path[50] = "\0";
+    char full_dest_path[50] = "\0";
+    strcpy(full_src_path, src);
+    strcpy(full_dest_path, dest);
+
+    char changeable_src[50] = "\0";
+    char changeable_dest[50] = "\0";
+    strcpy(changeable_src, src);
+    strcpy(changeable_dest, dest);
+
+    int8_t src_retcode = read_path(changeable_src, &src_cwd, src_file);
+    int8_t dest_retcode = read_path(changeable_dest, &dest_cwd, dest_file);
 
     if (src_retcode == 3){
         puts("Error: Source file not valid1", VGA_COLOR_RED);
@@ -158,23 +168,25 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
                 syscall(2, (uint32_t)&dest_req, (uint32_t)&dest_retcode, (uint32_t)&dest_cluster_number);
 
                 // loop through the directory table of src
+                struct FAT32DirectoryTable *dir_table = src_req.buf;
                 for (int i = 1 ; i < 8*64; i++){
-                    struct FAT32DirectoryTable *dir_table = src_req.buf;
                     if (dir_table->table[i].undelete) {
-                        char* new_src = src;
-                        strcat(new_src, "/");
-                        char* file_name = "\0";
-                        memcpy(file_name, dir_table->table[i].name, 8);
+                        char file_name[50] = "\0";
+                        strcpy(file_name, dir_table->table[i].name);
                         if (dir_table->table[i].attribute != ATTR_SUBDIRECTORY) {
                             strcat(file_name, ".");
                             strcat(file_name, dir_table->table[i].ext);
                         }
                         
+                        char new_src[50] = "\0";
+                        strcpy(new_src, full_src_path);
+                        strcat(new_src, "/");
                         strcat(new_src, file_name);
                         puts(new_src, VGA_COLOR_GREEN);
 
 
-                        char* new_dest = dest;
+                        char new_dest[50] = "\0";
+                        strcpy(new_dest, full_dest_path);
                         strcat(new_dest, "/");
                         strcat(new_dest, file_name);
                         puts(new_dest, VGA_COLOR_BLUE);
