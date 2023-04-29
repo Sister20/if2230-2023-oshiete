@@ -2,7 +2,7 @@
 
 ## Overview
 
-![image](https://user-images.githubusercontent.com/88904787/228767233-d504487a-6021-49c3-ae64-620d1b5eb352.png)
+![image](https://user-images.githubusercontent.com/108329026/235289519-d0200b5d-a6dd-4af0-9e00-5155ceb0041a.png)
 
 This project is a 32 bit Operating System named OShiete made to fulfill IF2230 task. This project is currently on Milestone 2
 
