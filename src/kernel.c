@@ -11,58 +11,10 @@
 #include "lib-header/interrupt.h"
 #include "lib-header/keyboard.h"
 #include "lib-header/paging.h"
+#include "lib-header/string.h"
 
 void kernel_setup(void)
 {
-    // enter_protected_mode(&_gdt_gdtr);
-    // pic_remap();
-    // initialize_idt();
-    // framebuffer_clear();
-    // splash();
-    // framebuffer_set_cursor(15, 0);
-    // activate_keyboard_interrupt();
-    // initialize_filesystem_fat32();
-
-    // allocate_single_user_page_frame((void *)0x0);
-    // *((uint8_t*) 0x500000) = 1;
-
-    // struct ClusterBuffer cbuf[5];
-    // for (uint32_t i = 0; i < 5; i++)
-    //     for (uint32_t j = 0; j < CLUSTER_SIZE; j++)
-    //         cbuf[i].buf[j] = i + 'a';
-
-    // struct FAT32DriverRequest request = {
-    //     .buf                   = cbuf,
-    //     .name                  = "ikanaide",
-    //     .ext                   = "uwu",
-    //     .parent_cluster_number = ROOT_CLUSTER_NUMBER,
-    //     .buffer_size           = 0,
-    // };
-
-    // write(request);  // Create folder "ikanaide"
-    // memcpy(request.name, "kano1\0\0\0", 8);
-    // write(request);  // Create folder "kano1"
-    // memcpy(request.name, "ikanaide", 8);
-    // memcpy(request.ext, "\0\0\0", 3);
-    // delete(request); // Delete first folder, thus creating hole in FS
-
-    // memcpy(request.name, "daijoubu", 8);
-    // request.buffer_size = 5*CLUSTER_SIZE;
-    // write(request);  // Create fragmented file "daijoubu"
-
-    // struct ClusterBuffer readcbuf;
-    // read_clusters(&readcbuf, ROOT_CLUSTER_NUMBER+1, 1);
-    // // If read properly, readcbuf should filled with 'a'
-
-    // request.buffer_size = CLUSTER_SIZE;
-    // read(request);   // Failed read due not enough buffer size
-    // request.buffer_size = 5*CLUSTER_SIZE;
-    // read(request);   // Success read on file "daijoubu"
-
-    // while (TRUE) {
-    //     keyboard_state_activate();
-    // }
-
     enter_protected_mode(&_gdt_gdtr);
     pic_remap();
     initialize_idt();
@@ -87,75 +39,40 @@ void kernel_setup(void)
     uint32_t found_cluster_number;
     read(request, &found_cluster_number);
 
-    // struct ClusterBuffer cbuf[1];
-    // for (uint32_t i = 0; i < 1; i++)
-    //     for (uint32_t j = 0; j < 20; j++)
-    //         cbuf[i].buf[j] = i + 'a';
+    struct ClusterBuffer cbuf[1];
 
-    // struct FAT32DriverRequest request2 = {
-    //     .buf                   = cbuf,
-    //     .name                  = "ikanaide",
-    //     .ext                   = "uwu",
-    //     .parent_cluster_number = ROOT_CLUSTER_NUMBER,
-    //     .buffer_size           = 2 * CLUSTER_SIZE,
-    // };
+    struct FAT32DriverRequest createFolder = {
+        .buf = cbuf,
+        .name = "oshiete",
+        .ext = "\0\0\0",
+        .parent_cluster_number = ROOT_CLUSTER_NUMBER,
+        .buffer_size = 0,
+    };
 
-    // write(request2);  // Create file "ikanaide"
+    write(createFolder);
 
-    // struct FAT32DriverRequest request3 = {
-    //     .buf = cbuf,
-    //     .name = "lol",
-    //     .ext = "\0\0\0",
-    //     .parent_cluster_number = ROOT_CLUSTER_NUMBER,
-    //     .buffer_size = 0,
-    // };
+    struct ClusterBuffer stringBuffer[1];
+    char* text = "Team Oshiete :\n13521044 Rachel Gabriela Chen\n13521046 Jeffrey Chow\n13521052 Melvin Kent Jonathan\n13521114 Farhan Nabil Suryono";
 
-    // write(request3);
+    for (uint32_t i = 0; i < 1; i++){
+        for (uint32_t j = 0; j < strlen(text); j++){
+            stringBuffer[i].buf[j] = i + text[j];
+        }
+    }
 
-    // struct FAT32DriverRequest request4 = {
-    //     .buf = cbuf,
-    //     .name = "lolsss",
-    //     .ext = "txt",
-    //     .parent_cluster_number = 10,
-    //     .buffer_size = CLUSTER_SIZE,
-    // };
+    struct FAT32DriverRequest createFile = {
+        .buf = stringBuffer,
+        .name = "oshiete",
+        .ext = "os",
+        .parent_cluster_number = ROOT_CLUSTER_NUMBER,
+        .buffer_size = sizeof(stringBuffer),
+    };
 
-    // write(request4);
-
-    // struct FAT32DriverRequest request5 = {
-    //     .buf = cbuf,
-    //     .name = "sleep",
-    //     .ext = "\0\0\0",
-    //     .parent_cluster_number = 10,
-    //     .buffer_size = CLUSTER_SIZE,
-    // };
-
-    // write(request5);
-
-    // struct FAT32DriverRequest request6 = {
-    //     .buf = cbuf,
-    //     .name = "ktl",
-    //     .ext = "ktl",
-    //     .parent_cluster_number = 10,
-    //     .buffer_size = CLUSTER_SIZE,
-    // };
-
-    // write(request6);
-
-    // struct FAT32DriverRequest request7 = {
-    //     .buf = cbuf,
-    //     .name = "ktlsss",
-    //     .ext = "ktl",
-    //     .parent_cluster_number = 10,
-    //     .buffer_size = CLUSTER_SIZE,
-    // };
-
-    // write(request7);
+    write(createFile);
 
     // Set TSS $esp pointer and jump into shell
     set_tss_kernel_current_stack();
     kernel_execute_user_program((uint8_t *)0);
 
-    while (TRUE)
-        ;
+    while (TRUE);
 }
