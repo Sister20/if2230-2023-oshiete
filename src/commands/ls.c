@@ -2,7 +2,8 @@
 
 void ls(struct CurrentWorkingDirectory cwd, char *dir_name)
 {
-    static struct FAT32DirectoryTable dir_table[8] = {0};
+    struct FAT32DirectoryTable dir_table[8];
+    memset(dir_table, 0, sizeof(dir_table));
     struct FAT32DriverRequest request =
         {
             .buf = dir_table,

@@ -10,6 +10,6 @@
 
 void whereis(char *folder_name);
 
-void searchUtil(struct CurrentWorkingDirectory* cwd, char* folder_name);
+void searchUtil(struct CurrentWorkingDirectory* cwd, char* name, char* ext);
 
 #endif
