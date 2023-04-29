@@ -171,7 +171,6 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
             puts("Error : -r not specified.", VGA_COLOR_RED);
             return;
         } else {
-            
             // if destination folder already exists, 
             if (dest_type == 0) {
                 strcat(full_dest_path, "/");
@@ -201,14 +200,11 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
                         strcpy(new_src, full_src_path);
                         strcat(new_src, "/");
                         strcat(new_src, file_name);
-                        puts(new_src, VGA_COLOR_GREEN);
-
 
                         char new_dest[50] = "\0";
                         strcpy(new_dest, full_dest_path);
                         strcat(new_dest, "/");
                         strcat(new_dest, file_name);
-                        puts(new_dest, VGA_COLOR_BLUE);
 
                         cp(cwd, new_src, new_dest, 1, 0);
                     }
