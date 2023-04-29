@@ -133,7 +133,7 @@ int8_t read_directory(struct FAT32DriverRequest request, uint32_t *found_cluster
         for (int i = 1; i < (int)(CLUSTER_SIZE / sizeof(struct FAT32DirectoryEntry)); i++)
         {
             // current dir entry has the same name as req
-            if (memcmp((void *)&driver_state.dir_table_buf.table[i].name, request.name, 8) == 0 && driver_state.dir_table_buf.table[i].undelete)
+            if (memcmp((void *)&driver_state.dir_table_buf.table[i].name, request.name, 8) == 0 && driver_state.dir_table_buf.table[i].undelete && memcmp((void *)&driver_state.dir_table_buf.table[i].ext, request.ext , 3) == 0)
             {
                 ret = 1;
                 //  current dir entry is a subdir
