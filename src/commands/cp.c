@@ -168,8 +168,8 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
                 syscall(2, (uint32_t)&dest_req, (uint32_t)&dest_retcode, (uint32_t)&dest_cluster_number);
 
                 // loop through the directory table of src
+                struct FAT32DirectoryTable *dir_table = src_req.buf;
                 for (int i = 1 ; i < 8*64; i++){
-                    struct FAT32DirectoryTable *dir_table = src_req.buf;
                     if (dir_table->table[i].undelete) {
                         char file_name[50] = "\0";
                         strcpy(file_name, dir_table->table[i].name);
