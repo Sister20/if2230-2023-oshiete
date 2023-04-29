@@ -239,6 +239,4 @@ int8_t rename_dir(struct FAT32DriverRequest request, char* new_name);
 
 int8_t move_dir(struct FAT32DriverRequest request, uint32_t new_cluster_number);
 
-int8_t delete_all(struct FAT32DriverRequest request);
-
 #endif

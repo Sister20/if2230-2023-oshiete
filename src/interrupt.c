@@ -121,11 +121,7 @@ void syscall(struct CPURegister cpu, __attribute__((unused)) struct InterruptSta
         struct FAT32DriverRequest request = *(struct FAT32DriverRequest *)cpu.ebx;
         *((int8_t *)cpu.ecx) = move_dir(request, (uint32_t)cpu.edx);
     }
-    else if (cpu.eax == 9){
-        // delete all
-        struct FAT32DriverRequest request = *(struct FAT32DriverRequest *)cpu.ebx;
-        *((int8_t *)cpu.ecx) = delete_all(request);
-    }
+
 }
 
 void activate_keyboard_interrupt(void)
