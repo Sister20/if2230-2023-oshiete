@@ -137,6 +137,8 @@ void cp(struct CurrentWorkingDirectory cwd, char* src, char* dest, int8_t is_rec
         struct FAT32DriverRequest new_req = dest_req;
         memcpy(new_req.name, dest_req.name, 8);
         memcpy(new_req.ext, dest_req.ext, 3);
+        new_req.buffer_size = sizeof(src_req.buf);
+        new_req.buf = src_req.buf;
 
         // WRITE FILE
         syscall(2, (uint32_t)&new_req, (uint32_t)&dest_retcode, (uint32_t)&dest_cluster_number);
