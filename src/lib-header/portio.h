@@ -19,4 +19,10 @@ void out(uint16_t port, uint8_t data);
  */
 uint8_t in(uint16_t port);
 
+// void out with 16-bit version
+void out16(uint16_t port, uint16_t data);
+
+// void in with 16-bit version
+uint16_t in16(uint16_t port);
+
 #endif

@@ -1,3 +1,12 @@
 {
     "debug.onTaskErrors": "debugAnyway",
+    "files.associations": {
+        "*.pl": "prolog",
+        "portio.h": "c",
+        "stdtype.h": "c",
+        "interrupt.h": "c",
+        "framebuffer.h": "c",
+        "stdmem.h": "c",
+        "keyboard.h": "c"
+    },
 }
